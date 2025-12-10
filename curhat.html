@@ -1,0 +1,27 @@
+<form id="curhatForm">
+  <input type="text" name="name" placeholder="Nama" required>
+  <textarea name="message" placeholder="Curhatan..." required></textarea>
+  <button type="submit">Kirim</button>
+</form>
+
+<div id="status"></div>
+
+<script>
+document.getElementById("curhatForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+
+  const payload = {
+    name: e.target.name.value,
+    message: e.target.message.value
+  };
+
+  const res = await fetch("/api/submit", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify(payload)
+  });
+
+  const data = await res.json();
+  document.getElementById("status").innerText = data.msg || data.error;
+});
+</script>
