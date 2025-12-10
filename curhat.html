@@ -1,27 +1,110 @@
-<form id="curhatForm">
-  <input type="text" name="name" placeholder="Nama" required>
-  <textarea name="message" placeholder="Curhatan..." required></textarea>
-  <button type="submit">Kirim</button>
-</form>
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<title>Curhat Ceria 7C</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background: #f0f8ff;
+        padding: 20px;
+        color: #333;
+        text-align: center;
+    }
+    h1 {
+        color: #ff6f61;
+    }
+    .card {
+        background: white;
+        margin: auto;
+        max-width: 400px;
+        padding: 20px;
+        border-radius: 16px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    textarea {
+        width: 100%;
+        height: 140px;
+        padding: 12px;
+        border-radius: 10px;
+        border: 1px solid #ccc;
+        font-size: 16px;
+        resize: none;
+    }
+    button {
+        margin-top: 15px;
+        width: 100%;
+        padding: 14px;
+        border: none;
+        background: #ff6f61;
+        color: white;
+        font-size: 18px;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: 0.2s;
+    }
+    button:hover {
+        background: #ff4a43;
+    }
+    #msg {
+        margin-top: 20px;
+        font-weight: bold;
+        color: green;
+    }
+</style>
+</head>
+<body>
 
-<div id="status"></div>
+<h1>Curhat Ceria 🌈</h1>
+<p>Tulis curhatmu di bawah ini. Rahasia terjamin!</p>
+
+<div class="card">
+    <textarea id="curhat" placeholder="Tulis cerita atau curhatmu di sini ya..."></textarea>
+    <button id="send">Kirim</button>
+    <div id="msg"></div>
+</div>
 
 <script>
-document.getElementById("curhatForm").addEventListener("submit", async (e) => {
-  e.preventDefault();
+const API_URL = "https://script.google.com/macros/s/AKfycbxVqSFLXhfuZ0jpgzjTOAva2R1yfX8zA5PUpaJ0H9TVB4RKyi2kTmKAv4sPLNfDQFTU/exec";
 
-  const payload = {
-    name: e.target.name.value,
-    message: e.target.message.value
-  };
+document.getElementById("send").onclick = async () => {
+    const curhat = document.getElementById("curhat").value.trim();
+    const msgEl = document.getElementById("msg");
 
-  const res = await fetch("/api/submit", {
-    method: "POST",
-    headers: {"Content-Type": "application/json"},
-    body: JSON.stringify(payload)
-  });
+    if (!curhat) {
+        msgEl.style.color = "red";
+        msgEl.textContent = "Curhat tidak boleh kosong!";
+        return;
+    }
 
-  const data = await res.json();
-  document.getElementById("status").innerText = data.msg || data.error;
-});
+    msgEl.textContent = "Mengirim...";
+    msgEl.style.color = "black";
+
+    try {
+        const res = await fetch(API_URL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ message: curhat })
+        });
+
+        const data = await res.json();
+
+        if (data.success) {
+            msgEl.style.color = "green";
+            msgEl.textContent = "Curhat berhasil dikirim! 💖";
+
+            document.getElementById("curhat").value = "";
+        } else {
+            msgEl.style.color = "red";
+            msgEl.textContent = "Gagal mengirim curhat!";
+        }
+    } catch (err) {
+        msgEl.style.color = "red";
+        msgEl.textContent = "Error jaringan!";
+    }
+};
 </script>
+
+</body>
+</html>
