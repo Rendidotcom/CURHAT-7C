@@ -2,23 +2,23 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8">
-<title>Curhat Ceria 7C</title>
+<title>Curhat Ceria</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
     body {
         font-family: Arial, sans-serif;
-        background: #f0f8ff;
+        background: #e4f1ff;
         padding: 20px;
-        color: #333;
         text-align: center;
+        color: #333;
     }
     h1 {
         color: #ff6f61;
     }
     .card {
         background: white;
-        margin: auto;
         max-width: 400px;
+        margin: auto;
         padding: 20px;
         border-radius: 16px;
         box-shadow: 0 4px 12px rgba(0,0,0,0.1);
@@ -27,22 +27,21 @@
         width: 100%;
         height: 140px;
         padding: 12px;
-        border-radius: 10px;
         border: 1px solid #ccc;
+        border-radius: 10px;
         font-size: 16px;
         resize: none;
     }
     button {
         margin-top: 15px;
-        width: 100%;
         padding: 14px;
-        border: none;
+        width: 100%;
         background: #ff6f61;
         color: white;
-        font-size: 18px;
+        border: none;
         border-radius: 10px;
+        font-size: 18px;
         cursor: pointer;
-        transition: 0.2s;
     }
     button:hover {
         background: #ff4a43;
@@ -50,17 +49,16 @@
     #msg {
         margin-top: 20px;
         font-weight: bold;
-        color: green;
     }
 </style>
 </head>
 <body>
 
-<h1>Curhat Ceria 🌈</h1>
-<p>Tulis curhatmu di bawah ini. Rahasia terjamin!</p>
+<h1>Curhat Ceria</h1>
+<p>Tulis curhatmu di bawah ini. Rahasia aman!</p>
 
 <div class="card">
-    <textarea id="curhat" placeholder="Tulis cerita atau curhatmu di sini ya..."></textarea>
+    <textarea id="curhat" placeholder="Tulis cerita atau curhatmu di sini..."></textarea>
     <button id="send">Kirim</button>
     <div id="msg"></div>
 </div>
@@ -70,16 +68,16 @@ const API_URL = "https://script.google.com/macros/s/AKfycbxVqSFLXhfuZ0jpgzjTOAva
 
 document.getElementById("send").onclick = async () => {
     const curhat = document.getElementById("curhat").value.trim();
-    const msgEl = document.getElementById("msg");
+    const msg = document.getElementById("msg");
 
     if (!curhat) {
-        msgEl.style.color = "red";
-        msgEl.textContent = "Curhat tidak boleh kosong!";
+        msg.style.color = "red";
+        msg.textContent = "Curhat tidak boleh kosong.";
         return;
     }
 
-    msgEl.textContent = "Mengirim...";
-    msgEl.style.color = "black";
+    msg.textContent = "Mengirim...";
+    msg.style.color = "black";
 
     try {
         const res = await fetch(API_URL, {
@@ -88,20 +86,20 @@ document.getElementById("send").onclick = async () => {
             body: JSON.stringify({ message: curhat })
         });
 
-        const data = await res.json();
+        const json = await res.json();
 
-        if (data.success) {
-            msgEl.style.color = "green";
-            msgEl.textContent = "Curhat berhasil dikirim! 💖";
-
+        if (json.success) {
+            msg.style.color = "green";
+            msg.textContent = "Curhat berhasil dikirim!";
             document.getElementById("curhat").value = "";
         } else {
-            msgEl.style.color = "red";
-            msgEl.textContent = "Gagal mengirim curhat!";
+            msg.style.color = "red";
+            msg.textContent = "Gagal mengirim curhat.";
         }
-    } catch (err) {
-        msgEl.style.color = "red";
-        msgEl.textContent = "Error jaringan!";
+
+    } catch (e) {
+        msg.style.color = "red";
+        msg.textContent = "Error jaringan!";
     }
 };
 </script>
