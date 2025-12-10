@@ -1,5 +1,2 @@
-// =======================
-// CONFIG API BACKEND
-// =======================
-export const API_URL =
-  "https://script.google.com/macros/s/AKfycbznTP1rdkrz-5P2nc9eY6C0Zbn7VdRn9D5TT2cKFXQciEyLecq3x30DO5h6A9hhx_T4tA/exec";
+// config.js — FINAL CURHAT 7C
+window.API_URL = "https://script.google.com/macros/s/AKfycbxVqSFLXhfuZ0jpgzjTOAva2R1yfX8zA5PUpaJ0H9TVB4RKyi2kTmKAv4sPLNfDQFTU/exec";
