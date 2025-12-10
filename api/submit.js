@@ -1,12 +1,9 @@
-// api/submit.js — FINAL
-import { API_URL } from "../config.js";
+const API_URL = "https://script.google.com/macros/s/AKfycbxVqSFLXhfuZ0jpgzjTOAva2R1yfX8zA5PUpaJ0H9TVB4RKyi2kTmKAv4sPLNfDQFTU/exec";
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {
-    return res.status(405).json({ error: "Method not allowed" });
+    return res.status(405).json({ error: "Method tidak diizinkan" });
   }
-
-  const { nama, pesan } = req.body;
 
   try {
     const response = await fetch(API_URL, {
@@ -14,15 +11,15 @@ export default async function handler(req, res) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         action: "submitCurhat",
-        nama,
-        pesan,
-      }),
+        nama: req.body.nama,
+        pesan: req.body.pesan
+      })
     });
 
     const result = await response.json();
-    res.status(200).json(result);
+    return res.status(200).json(result);
 
-  } catch (error) {
-    res.status(500).json({ error: "Gagal mengirim data", detail: error });
+  } catch (err) {
+    return res.status(500).json({ error: true, message: err.message });
   }
 }
