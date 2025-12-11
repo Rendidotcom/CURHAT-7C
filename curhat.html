@@ -1,191 +1,92 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="UTF-8">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Curhat 7C</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
 
 <style>
     body {
         font-family: system-ui, Arial;
-        background: #f2f4f8;
         margin: 0;
+        background: #f2f5f9;
         padding: 0;
     }
-
     .container {
         max-width: 600px;
-        margin: 40px auto;
-        padding: 25px;
-        background: #ffffff;
-        border-radius: 18px;
-        box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        margin: auto;
+        padding: 20px;
     }
-
-    h1 {
+    h2 {
         text-align: center;
-        margin-top: 0;
-        font-size: 26px;
-        color: #333;
-        font-weight: 700;
+        margin-top: 10px;
     }
-
     textarea {
         width: 100%;
-        height: 160px;
-        padding: 15px;
-        border-radius: 12px;
+        min-height: 150px;
+        padding: 12px;
+        border-radius: 10px;
         border: 1px solid #ccc;
-        resize: none;
-        font-size: 16px;
-        line-height: 1.5;
-        background: #fafafa;
-        transition: 0.2s;
-    }
-    textarea:focus {
-        border-color: #4092ff;
-        outline: none;
-        background: #fff;
-    }
-
-    .upload-box {
-        margin-top: 18px;
-        padding: 15px;
-        border: 2px dashed #ccc;
-        border-radius: 12px;
-        text-align: center;
-        cursor: pointer;
-        background: #fafafa;
-        transition: 0.2s;
-        color: #666;
-    }
-    .upload-box:hover {
-        border-color: #4092ff;
-        background: #fff;
-    }
-
-    .preview-image {
-        margin-top: 15px;
-        max-width: 100%;
-        display: none;
-        border-radius: 12px;
-    }
-
-    button {
-        margin-top: 22px;
-        width: 100%;
-        padding: 14px;
-        font-size: 17px;
-        background: #4092ff;
-        color: white;
-        border: none;
-        border-radius: 12px;
-        cursor: pointer;
-        transition: 0.2s;
-    }
-    button:hover {
-        background: #2d7ae9;
-    }
-
-    #msg {
-        margin-top: 18px;
-        text-align: center;
         font-size: 15px;
+        resize: vertical;
+    }
+    button {
+        margin-top: 15px;
+        width: 100%;
+        padding: 12px;
+        font-size: 17px;
+        border: none;
+        border-radius: 10px;
+        background: #0066ff;
+        color: #fff;
+        cursor: pointer;
+    }
+    button:active {
+        opacity: 0.8;
+    }
+    #msg {
+        margin-top: 15px;
+        text-align: center;
+        font-weight: 600;
+    }
+    .user-box {
+        background: white;
+        padding: 12px;
+        border-radius: 10px;
+        margin-bottom: 15px;
+        border-left: 4px solid #0066ff;
     }
 </style>
 </head>
 
 <body>
-
 <div class="container">
-    <h1>Curhat 7C</h1>
+    <h2>Curhat 7C</h2>
 
-    <textarea id="curhat" placeholder="Tulis curhat kamu di sini... (anonim, aman, rahasia)"></textarea>
+    <div id="userInfo" class="user-box"></div>
 
-    <div class="upload-box" onclick="document.getElementById('foto').click();">
-        Klik di sini untuk upload foto (opsional)
-    </div>
+    <textarea id="curhat" placeholder="Tulis curhatmu di sini..."></textarea>
 
-    <input type="file" id="foto" accept="image/*" style="display:none">
-
-    <img id="preview" class="preview-image">
-
-    <button onclick="submitCurhat()">Kirim Curhat</button>
+    <button id="submitBtn">Kirim Curhat</button>
 
     <div id="msg"></div>
 </div>
 
+<!-- CONFIG + SUBMIT -->
+<script src="js/config.js"></script>
+<script src="js/submit.js"></script>
 
 <script>
-// =======================================
-// CONFIG BACKEND (Vercel Function Route)
-// =======================================
-const API_URL = "/api/submit";   // Endpoint API validated
-
-
-// ============================
-// FOTO PREVIEW
-// ============================
-document.getElementById("foto").addEventListener("change", function(e) {
-    const file = e.target.files[0];
-    const preview = document.getElementById("preview");
-
-    if (file) {
-        const reader = new FileReader();
-        reader.onload = function(ev) {
-            preview.src = ev.target.result;
-            preview.style.display = "block";
-        };
-        reader.readAsDataURL(file);
-    } else {
-        preview.style.display = "none";
-    }
-});
-
-
-// ============================
-// KIRIM CURHAT
-// ============================
-async function submitCurhat() {
-    const msg = document.getElementById("msg");
-    msg.innerHTML = "Mengirim...";
-
-    const curhatText = document.getElementById("curhat").value.trim();
-    const fotoFile = document.getElementById("foto").files[0];
-
-    if (!curhatText) {
-        msg.innerHTML = "Curhat tidak boleh kosong.";
-        return;
+    // === LOAD SESSION ===
+    const session = JSON.parse(localStorage.getItem("familyUser") || "null");
+    if (!session) {
+        alert("Silakan login dulu.");
+        location.href = "login.html";
     }
 
-    const fd = new FormData();
-    fd.append("curhat", curhatText);
+    document.getElementById("userInfo").innerHTML =
+        `<b>Halo, ${session.name || "Pengguna"}!</b><br>Kamu bisa curhat dengan aman di sini.`;
 
-    if (fotoFile) {
-        fd.append("foto", fotoFile);
-    }
-
-    try {
-        const res = await fetch(API_URL, {
-            method: "POST",
-            body: fd
-        });
-
-        const json = await res.json();
-
-        if (json.ok) {
-            msg.innerHTML = "Curhat terkirim! Terima kasih 🙏";
-            document.getElementById("curhat").value = "";
-            document.getElementById("foto").value = "";
-            document.getElementById("preview").style.display = "none";
-        } else {
-            msg.innerHTML = "Gagal: " + json.error;
-        }
-
-    } catch (err) {
-        msg.innerHTML = "Error: " + err.message;
-    }
-}
 </script>
 
 </body>
