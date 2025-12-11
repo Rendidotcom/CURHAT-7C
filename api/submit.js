@@ -1,23 +1,19 @@
 /* ============================================================
    submit.js — FINAL STABLE VERSION
-   - Auto load session + token
-   - Supports JSON/FormData submission
-   - Uses apiRequest() from config.js
 ============================================================== */
 
 (function () {
-  const API_URL = window.API_URL;
-  const { getSession, validateToken, clearSession, createNavbar, apiRequest } = window;
+  const { getSession, clearSession, createNavbar, apiRequest } = window;
 
-  // Navbar (jika ada)
+  // Render navbar jika ada
   if (typeof createNavbar === "function") createNavbar();
 
-  // Elemen
+  // Ambil elemen
   const form = document.getElementById("submitForm");
   const msg = document.getElementById("msg");
 
   // ===========================
-  // 1. SESSION CHECK
+  // 1. SESSION VALIDATION
   // ===========================
   const session = getSession();
   if (!session || !session.token) {
@@ -27,35 +23,30 @@
   }
 
   // ===========================
-  // 2. FORM SUBMIT
+  // 2. HANDLE SUBMIT FORM
   // ===========================
   form.addEventListener("submit", async function (e) {
     e.preventDefault();
     msg.textContent = "Mengirim...";
 
     try {
-      // Ambil semua input dari form
+      // Ambil input form → object
       const fd = new FormData(form);
+      const data = {};
+      fd.forEach((value, key) => (data[key] = value));
 
-      // Ubah FormData ke object biasa
-      let data = {};
-      fd.forEach((value, key) => {
-        data[key] = value;
-      });
-
-      // Kirim ke GAS (ACTION: submit)
+      // Request ke GAS
       const result = await apiRequest("submit", data);
 
       if (result.status === "success") {
         msg.textContent = "Berhasil disimpan!";
         form.reset();
       } else {
-        msg.textContent = "Gagal: " + result.message;
+        msg.textContent = "Gagal: " + (result.message || "Unknown error");
       }
     } catch (err) {
-      console.error(err);
+      console.error("Submit error:", err);
       msg.textContent = "Error: " + err.message;
     }
   });
-
 })();

@@ -1,120 +1,83 @@
-/* ======================================================
-   config.js — FINAL STABLE VERSION
-   - Auto-detect environment (local / production)
-   - Global helpers: session, token, fetch wrapper
-   - Safe CORS + JSON/FormData support
-====================================================== */
+// ======================================================
+// config.js — FINAL STABLE VERSION
+// ======================================================
 
 (function () {
-  // ======================================================
-  // 1. API URL — gunakan URL VALID yang kamu pakai
-  // ======================================================
-  const API_URL =
-    "https://script.google.com/macros/s/AKfycbzyQzbKwHKgjOAQWWYs4loX7YadF75CSVpUdvjtoflcx1ri699KfcYZSU4rqFzXWFhfUw/exec";
+  // ===============================
+  //  API URL (FIXED)
+  // ===============================
+  window.API_URL =
+    "https://script.google.com/macros/s/AKfycbz1DnqznxmQMgOg7NB7N7Himp6yPmfBwqfjkBC2KMIg06Q7SVdQL5DSCMet5ibTo4OutQ/exec";
 
-  window.API_URL = API_URL;
+  // ===============================
+  //  SESSION HELPERS
+  // ===============================
+  window.getSession = function () {
+    return JSON.parse(localStorage.getItem("familyUser") || "null");
+  };
 
-  // ======================================================
-  // 2. SESSION HELPERS
-  // ======================================================
-  function getSession() {
-    try {
-      return JSON.parse(localStorage.getItem("familyUser") || "null");
-    } catch (e) {
-      return null;
-    }
-  }
-
-  function saveSession(obj) {
+  window.saveSession = function (obj) {
     localStorage.setItem("familyUser", JSON.stringify(obj));
-  }
+  };
 
-  function clearSession() {
+  window.clearSession = function () {
     localStorage.removeItem("familyUser");
-  }
+  };
 
-  function validateToken() {
-    const s = getSession();
-    return s && s.token ? s.token : null;
-  }
+  window.validateToken = function () {
+    const s = window.getSession();
+    return s && s.token ? true : false;
+  };
 
-  // ======================================================
-  // 3. UNIVERSAL FETCH WRAPPER
-  // ======================================================
-  async function apiRequest(action, data = {}) {
-    const token = validateToken();
+  // ===============================
+  //  UNIVERSAL API REQUEST
+  // ===============================
+  window.apiRequest = async function (action, payload = {}) {
+    try {
+      const session = window.getSession();
+      const token = session ? session.token : "";
 
-    // -------------------------
-    // AUTO: gunakan FormData jika value bukan murni JSON
-    // -------------------------
-    let body;
-    let headers = {};
-
-    const mustUseForm =
-      Object.values(data).some((v) => typeof v !== "string" && typeof v !== "number");
-
-    if (mustUseForm) {
-      body = new FormData();
-      body.append("action", action);
-      if (token) body.append("token", token);
-
-      for (let k in data) {
-        body.append(k, data[k]);
-      }
-    } else {
-      headers["Content-Type"] = "application/json";
-      body = JSON.stringify({
-        action,
-        token,
-        ...data,
+      const res = await fetch(window.API_URL, {
+        method: "POST",
+        body: JSON.stringify({
+          action,
+          token,
+          ...payload,
+        }),
+        headers: {
+          "Content-Type": "application/json",
+        },
       });
+
+      return await res.json();
+    } catch (err) {
+      console.error("apiRequest error:", err);
+      return { status: "error", message: err.message };
     }
+  };
 
-    // -------------------------
-    // EXECUTE
-    // -------------------------
-    const res = await fetch(API_URL, {
-      method: "POST",
-      body,
-      headers,
-    });
-
-    if (!res.ok) {
-      throw new Error("HTTP error: " + res.status);
-    }
-
-    // JSON RESPONSE NORMAL
-    return await res.json();
-  }
-
-  // ======================================================
-  // 4. NAVBAR HELPER (optional)
-  // ======================================================
-  function createNavbar() {
+  // ===============================
+  //  NAVBAR AUTO-RENDER (opsional)
+  // ===============================
+  window.createNavbar = function () {
     const bar = document.getElementById("navbar");
     if (!bar) return;
 
+    const s = window.getSession();
+
     bar.innerHTML = `
-      <a href="index.html">Home</a>
-      <a href="edit.html">Edit</a>
-      <a href="delete.html">Delete</a>
-      <a href="#" id="logoutBtn">Logout</a>
+      <div class="nav">
+        <a href="index.html">Home</a>
+        <a href="submit.html">Submit</a>
+        <a href="edit.html">Edit</a>
+        <a href="#" id="logoutBtn">Logout</a>
+      </div>
     `;
 
-    document.getElementById("logoutBtn").onclick = () => {
-      clearSession();
-      alert("Berhasil logout");
+    const logout = document.getElementById("logoutBtn");
+    logout.onclick = function () {
+      window.clearSession();
       location.href = "login.html";
     };
-  }
-
-  // ======================================================
-  // 5. EXPORT GLOBAL
-  // ======================================================
-  window.getSession = getSession;
-  window.saveSession = saveSession;
-  window.clearSession = clearSession;
-  window.validateToken = validateToken;
-  window.apiRequest = apiRequest;
-  window.createNavbar = createNavbar;
+  };
 })();
