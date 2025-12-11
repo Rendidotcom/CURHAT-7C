@@ -67,6 +67,13 @@
         margin-top: 15px;
     }
 
+    #preview {
+        margin-top: 14px;
+        max-width: 100%;
+        display: none;
+        border-radius: 12px;
+    }
+
     button {
         width: 100%;
         margin-top: 20px;
@@ -81,6 +88,11 @@
         transition: 0.2s;
     }
 
+    button:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+
     button:hover {
         background: #1f3ed6;
     }
@@ -88,9 +100,7 @@
     #msg {
         margin-top: 14px;
         font-size: 14px;
-        color: red;
     }
-
 </style>
 </head>
 
@@ -98,7 +108,6 @@
 
 <div class="box">
 
-    <!-- gambar kartun -->
     <img src="https://cdn-icons-png.flaticon.com/512/6596/6596121.png"
          class="cartoon">
 
@@ -110,7 +119,9 @@
 
         <input type="file" id="foto" name="foto" accept="image/*">
 
-        <button type="submit">Kirim Curhat</button>
+        <img id="preview">
+
+        <button type="submit" id="btnKirim">Kirim Curhat</button>
 
         <div id="msg"></div>
     </form>
@@ -118,19 +129,39 @@
 </div>
 
 <script>
-const API_URL = "https://script.google.com/macros/s/AKfycbyg5ZYnxhjRyXZJ4qukPwK7fuW7L4pWkGjA6Gag8VVMjWyi_gh1WySdrIkhmbvigGA1Og/exec"; // <-- MASUKKAN URL GAS DI SINI
+// =============================
+//  UPDATE SESUAI GAS KAMU
+// =============================
+const API_URL = "https://script.google.com/macros/s/AKfycbwT8cCL8pwW2ABRneD7QZS8AepPpcKqXx3uzLjqPCfNxLnn58Q_lf_HK8AaWNZGSwnz/exec";
+
+// Preview foto
+document.getElementById("foto").addEventListener("change", function () {
+    const file = this.files[0];
+    const preview = document.getElementById("preview");
+
+    if (file) {
+        preview.src = URL.createObjectURL(file);
+        preview.style.display = "block";
+    } else {
+        preview.style.display = "none";
+    }
+});
 
 document.getElementById("curhatForm").addEventListener("submit", async (e) => {
     e.preventDefault();
 
     const msg = document.getElementById("msg");
+    const btn = document.getElementById("btnKirim");
+
+    msg.style.color = "black";
     msg.textContent = "Mengirim...";
+    btn.disabled = true;
 
     const formData = new FormData();
     formData.append("curhat", document.getElementById("curhat").value);
 
     const foto = document.getElementById("foto").files[0];
-    if (foto) formData.append("foto", foto); // WAJIB "foto"
+    if (foto) formData.append("foto", foto); // sesuai code.gs
 
     try {
         const res = await fetch(API_URL, {
@@ -144,7 +175,10 @@ document.getElementById("curhatForm").addEventListener("submit", async (e) => {
             msg.style.color = "green";
             msg.textContent = "Curhat berhasil dikirim!";
 
+            // Reset form
             document.getElementById("curhatForm").reset();
+            document.getElementById("preview").style.display = "none";
+
         } else {
             msg.style.color = "red";
             msg.textContent = "Error: " + data.error;
@@ -154,6 +188,8 @@ document.getElementById("curhatForm").addEventListener("submit", async (e) => {
         msg.style.color = "red";
         msg.textContent = "Gagal mengirim. Cek koneksi atau URL API.";
     }
+
+    btn.disabled = false;
 });
 </script>
 
