@@ -1,123 +1,131 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Curhat Kamu</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Curhat 7C</title>
 
 <style>
-  body {
-    font-family: Arial, sans-serif;
-    background: #eef2f7;
-    padding: 20px;
-  }
-  .container {
-    max-width: 680px;
-    margin: auto;
-    background: #fff;
-    padding: 25px;
-    border-radius: 14px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-  }
-  textarea {
-    width: 100%;
-    height: 160px;
-    padding: 12px;
-    border-radius: 10px;
-    border: 1px solid #ccc;
-    resize: vertical;
-    font-size: 15px;
-  }
-  button {
-    margin-top: 20px;
-    background: #0066ff;
-    border: none;
-    padding: 14px 20px;
-    color: white;
-    border-radius: 10px;
-    width: 120px;
-    cursor: pointer;
-    font-size: 16px;
-  }
-  #status {
-    margin-top: 15px;
-    font-size: 14px;
-  }
+    body {
+        font-family: system-ui, Arial;
+        background: #f2f4f7;
+        padding: 20px;
+        margin: 0;
+    }
+    .container {
+        max-width: 480px;
+        margin: auto;
+        background: white;
+        padding: 20px;
+        border-radius: 14px;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+    }
+    h2 {
+        margin-top: 0;
+        text-align: center;
+        color: #333;
+    }
+    textarea {
+        width: 100%;
+        min-height: 140px;
+        padding: 12px;
+        font-size: 15px;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        resize: vertical;
+    }
+    input {
+        width: 100%;
+        padding: 12px;
+        font-size: 15px;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        margin-top: 8px;
+    }
+    button {
+        width: 100%;
+        padding: 14px;
+        font-size: 16px;
+        margin-top: 14px;
+        background: #0c7df2;
+        border: none;
+        border-radius: 8px;
+        color: white;
+        cursor: pointer;
+    }
+    button:hover {
+        background: #0a6ad1;
+    }
+    #msg {
+        margin-top: 16px;
+        text-align: center;
+        font-size: 15px;
+    }
 </style>
 </head>
-
 <body>
+
 <div class="container">
-  <h2>Curhat Kamu</h2>
+    <h2>Curhat 7C</h2>
 
-  <textarea id="curhat" placeholder="Tulis curhat kamu di sini..."></textarea>
+    <label>Nama (opsional)</label>
+    <input type="text" id="nama" placeholder="Isi nama boleh kosong">
 
-  <p><b>Upload Foto (opsional):</b></p>
-  <input type="file" id="photoInput" accept="image/*" />
+    <label>Curhat kamu</label>
+    <textarea id="curhat" placeholder="Tulis curhat kamu di sini..."></textarea>
 
-  <br><br>
-  <button onclick="submitCurhat()">Kirim</button>
+    <button onclick="submitCurhat()">Kirim Curhat</button>
 
-  <div id="status"></div>
+    <div id="msg"></div>
 </div>
 
+<!-- load config -->
+<script src="config.js"></script>
+
+<!-- submit logic -->
 <script>
-  async function submitCurhat() {
-    const status = document.getElementById("status");
-    const curhatText = document.getElementById("curhat").value.trim();
-    const fileInput = document.getElementById("photoInput");
+async function submitCurhat() {
+    const nama = document.getElementById("nama").value.trim();
+    const curhat = document.getElementById("curhat").value.trim();
+    const msg = document.getElementById("msg");
 
-    if (!curhatText) {
-      status.innerHTML = "<span style='color:red;'>Curhat tidak boleh kosong!</span>";
-      return;
+    msg.textContent = "Mengirim...";
+    msg.style.color = "#555";
+
+    if (!curhat) {
+        msg.textContent = "Curhat tidak boleh kosong.";
+        msg.style.color = "red";
+        return;
     }
-
-    status.innerHTML = "Mengirim...";
-
-    let base64Photo = "";
-    let photoName = "";
-
-    // Jika ada foto, convert ke Base64
-    if (fileInput.files.length > 0) {
-      const file = fileInput.files[0];
-      photoName = file.name;
-
-      base64Photo = await new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result);
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
-      });
-    }
-
-    // Payload dikirim ke Vercel API
-    const payload = {
-      curhat: curhatText,
-      photo: base64Photo,   // kosong jika tidak ada foto
-      photoName: photoName
-    };
 
     try {
-      const response = await fetch("/api/submit", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
-      });
+        const res = await fetch(window.API_URL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                action: "submit",
+                nama,
+                curhat
+            })
+        });
 
-      const result = await response.json();
+        const json = await res.json(); // wajib JSON
 
-      if (result.ok) {
-        status.innerHTML = "<span style='color:green;'>Curhat berhasil dikirim!</span>";
-        document.getElementById("curhat").value = "";
-        document.getElementById("photoInput").value = "";
-      } else {
-        status.innerHTML = "<span style='color:red;'>Gagal: " + result.error + "</span>";
-      }
+        if (json.ok) {
+            msg.textContent = "Curhat berhasil dikirim ✔";
+            msg.style.color = "green";
+
+            document.getElementById("curhat").value = "";
+        } else {
+            msg.textContent = "Gagal: " + (json.error || "Terjadi kesalahan");
+            msg.style.color = "red";
+        }
+
     } catch (err) {
-      status.innerHTML = "<span style='color:red;'>Error jaringan</span>";
-      console.error(err);
+        msg.textContent = "Error koneksi: " + err.message;
+        msg.style.color = "red";
     }
-  }
+}
 </script>
 
 </body>

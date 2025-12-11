@@ -1,43 +1,83 @@
-import { API_URL } from "../config.js";
+// submit.js — FINAL CLEAN VERSION
+// Handles create/submit new member via FormData with JSON fallback
+(function () {
+  const API_URL = window.API_URL;
+  const { getSession, validateToken, clearSession, createNavbar } = window;
+  if (typeof createNavbar === "function") createNavbar();
 
-export default async function handler(req, res) {
-  console.log("=== BODY DITERIMA ===");
-  console.log(req.body);
+  const msg = document.getElementById("msg");
+  const form = document.getElementById("submitForm");
 
-  if (req.method !== "POST") {
-    return res.status(405).json({ error: "Method not allowed" });
+  const session = getSession();
+  if (!session) {
+    alert("Silakan login kembali.");
+    location.href = "login.html";
+    return;
   }
 
-  try {
-    const response = await fetch(API_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        action: "submitCurhat",
-        nama: req.body.nama,
-        pesan: req.body.pesan
-      }),
-    });
-
-    const text = await response.text();  
-    console.log("=== BALASAN GAS ===");
-    console.log(text);
-
-    // coba parse JSON
-    try {
-      const json = JSON.parse(text);
-      return res.status(200).json(json);
-    } catch (err) {
-      return res.status(500).json({
-        error: "Invalid JSON dari GAS",
-        raw: text
-      });
+  // Token validation
+  (async () => {
+    const ok = await validateToken();
+    if (!ok) {
+      alert("Session berakhir, login kembali.");
+      clearSession();
+      location.href = "login.html";
     }
+  })();
 
-  } catch (err) {
-    return res.status(500).json({
-      error: "Gagal mengirim",
-      detail: err.message
-    });
+  function showMsg(text, color = "green") {
+    msg.textContent = text;
+    msg.style.color = color;
   }
-}
+
+  // Handle submit
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    showMsg("Mengirim...", "blue");
+
+    try {
+      let payload;
+      let headers = { Authorization: `Bearer ${session.token}` };
+
+      const formData = new FormData(form);
+
+      // Try JSON (GAS auto format)
+      const jsonObj = {};
+      formData.forEach((v, k) => (jsonObj[k] = v));
+
+      payload = JSON.stringify(jsonObj);
+      headers["Content-Type"] = "application/json";
+
+      let res = await fetch(`${API_URL}?action=create`, {
+        method: "POST",
+        body: payload,
+        headers,
+      });
+
+      // If JSON rejected, retry using FormData
+      if (!res.ok) {
+        const fd = new FormData();
+        formData.forEach((v, k) => fd.append(k, v));
+        fd.append("action", "create");
+
+        res = await fetch(API_URL, {
+          method: "POST",
+          body: fd,
+          headers: { Authorization: `Bearer ${session.token}` },
+        });
+      }
+
+      const data = await res.json().catch(() => null);
+
+      if (!res.ok || !data || data.success !== true) {
+        showMsg(data?.message || "Gagal menyimpan.", "red");
+        return;
+      }
+
+      showMsg("Data berhasil disimpan!");
+      form.reset();
+    } catch (err) {
+      showMsg("Error jaringan.", "red");
+    }
+  });
+})();
