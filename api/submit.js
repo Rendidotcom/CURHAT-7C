@@ -1,57 +1,61 @@
-export const config = {
-  runtime: "edge"
-};
+/* ============================================================
+   submit.js — FINAL STABLE VERSION
+   - Auto load session + token
+   - Supports JSON/FormData submission
+   - Uses apiRequest() from config.js
+============================================================== */
 
-export default async function handler(req) {
-  try {
+(function () {
+  const API_URL = window.API_URL;
+  const { getSession, validateToken, clearSession, createNavbar, apiRequest } = window;
 
-    // HARUS 1x SAJA!
-    const form = await req.formData();
+  // Navbar (jika ada)
+  if (typeof createNavbar === "function") createNavbar();
 
-    const curhat = form.get("curhat") || "";
-    const foto = form.get("foto") || null;
+  // Elemen
+  const form = document.getElementById("submitForm");
+  const msg = document.getElementById("msg");
 
-    if (!curhat.trim()) {
-      return Response.json(
-        { ok: false, error: "Curhat kosong" },
-        { status: 400 }
-      );
-    }
-
-    // --- Formula untuk GAS ---
-    const send = new FormData();
-    send.append("curhat", curhat);
-
-    if (foto && typeof foto === "object") {
-      send.append("foto", foto, foto.name || "upload.png");
-    }
-
-    // --- GAS URL ---
-    const GAS_URL =
-      "https://script.google.com/macros/s/AKfycbz1DnqznxmQMgOg7NB7N7Himp6yPmfBwqfjkBC2KMIg06Q7SVdQL5DSCMet5ibTo4OutQ/exec";
-
-    // --- Kirim ke GAS (NO HEADERS!) ---
-    const gasRes = await fetch(GAS_URL, {
-      method: "POST",
-      body: send
-    });
-
-    let data;
-    try {
-      data = await gasRes.json();
-    } catch (e) {
-      return Response.json(
-        { ok: false, error: "GAS returned non-JSON", raw: await gasRes.text() },
-        { status: 500 }
-      );
-    }
-
-    return Response.json(data);
-
-  } catch (err) {
-    return Response.json(
-      { ok: false, error: err.toString() },
-      { status: 500 }
-    );
+  // ===========================
+  // 1. SESSION CHECK
+  // ===========================
+  const session = getSession();
+  if (!session || !session.token) {
+    alert("Silakan login kembali.");
+    location.href = "login.html";
+    return;
   }
-}
+
+  // ===========================
+  // 2. FORM SUBMIT
+  // ===========================
+  form.addEventListener("submit", async function (e) {
+    e.preventDefault();
+    msg.textContent = "Mengirim...";
+
+    try {
+      // Ambil semua input dari form
+      const fd = new FormData(form);
+
+      // Ubah FormData ke object biasa
+      let data = {};
+      fd.forEach((value, key) => {
+        data[key] = value;
+      });
+
+      // Kirim ke GAS (ACTION: submit)
+      const result = await apiRequest("submit", data);
+
+      if (result.status === "success") {
+        msg.textContent = "Berhasil disimpan!";
+        form.reset();
+      } else {
+        msg.textContent = "Gagal: " + result.message;
+      }
+    } catch (err) {
+      console.error(err);
+      msg.textContent = "Error: " + err.message;
+    }
+  });
+
+})();

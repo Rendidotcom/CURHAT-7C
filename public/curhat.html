@@ -57,6 +57,7 @@
         cursor: pointer;
         background: #fafafa;
         transition: 0.2s;
+        color: #666;
     }
     .upload-box:hover {
         border-color: #4092ff;
@@ -116,9 +117,15 @@
 
 
 <script>
-const API_URL = "/api/submit";   // Vercel route
+// =======================================
+// CONFIG BACKEND (Vercel Function Route)
+// =======================================
+const API_URL = "/api/submit";   // Endpoint API validated
 
-// Preview foto
+
+// ============================
+// FOTO PREVIEW
+// ============================
 document.getElementById("foto").addEventListener("change", function(e) {
     const file = e.target.files[0];
     const preview = document.getElementById("preview");
@@ -135,7 +142,10 @@ document.getElementById("foto").addEventListener("change", function(e) {
     }
 });
 
-// Kirim curhat
+
+// ============================
+// KIRIM CURHAT
+// ============================
 async function submitCurhat() {
     const msg = document.getElementById("msg");
     msg.innerHTML = "Mengirim...";
@@ -164,15 +174,16 @@ async function submitCurhat() {
         const json = await res.json();
 
         if (json.ok) {
-            msg.innerHTML = "Curhat terkirim!";
+            msg.innerHTML = "Curhat terkirim! Terima kasih 🙏";
             document.getElementById("curhat").value = "";
             document.getElementById("foto").value = "";
             document.getElementById("preview").style.display = "none";
         } else {
             msg.innerHTML = "Gagal: " + json.error;
         }
+
     } catch (err) {
-        msg.innerHTML = "Error: " + err;
+        msg.innerHTML = "Error: " + err.message;
     }
 }
 </script>
