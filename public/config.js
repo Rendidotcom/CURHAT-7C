@@ -7,7 +7,7 @@
   //  API URL (FIXED)
   // ===============================
   window.API_URL =
-    "https://script.google.com/macros/s/AKfycbz1DnqznxmQMgOg7NB7N7Himp6yPmfBwqfjkBC2KMIg06Q7SVdQL5DSCMet5ibTo4OutQ/exec";
+    "https://script.google.com/macros/s/AKfycbyzKuH4cFruLQln9xBAvxXqWOfei9-YnmhEI3QYuPTH67PxWjE7GReKT4oKV-e5GuMEeA/exec";
 
   // ===============================
   //  SESSION HELPERS
