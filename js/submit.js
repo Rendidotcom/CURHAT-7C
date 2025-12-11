@@ -1,52 +1,37 @@
-/* ============================================================
-   submit.js — FINAL STABLE VERSION
-============================================================== */
+// submit.js — FINAL NO LOGIN, ANONIM, SUPPORT FOTO
 
-(function () {
-  const { getSession, clearSession, createNavbar, apiRequest } = window;
+document.getElementById("submitBtn").addEventListener("click", async () => {
+    const msg = document.getElementById("msg");
+    const text = document.getElementById("curhat").value.trim();
+    const foto = document.getElementById("foto").files[0];
 
-  // Render navbar jika ada
-  if (typeof createNavbar === "function") createNavbar();
-
-  // Ambil elemen
-  const form = document.getElementById("submitForm");
-  const msg = document.getElementById("msg");
-
-  // ===========================
-  // 1. SESSION VALIDATION
-  // ===========================
-  const session = getSession();
-  if (!session || !session.token) {
-    alert("Silakan login kembali.");
-    location.href = "login.html";
-    return;
-  }
-
-  // ===========================
-  // 2. HANDLE SUBMIT FORM
-  // ===========================
-  form.addEventListener("submit", async function (e) {
-    e.preventDefault();
     msg.textContent = "Mengirim...";
 
-    try {
-      // Ambil input form → object
-      const fd = new FormData(form);
-      const data = {};
-      fd.forEach((value, key) => (data[key] = value));
-
-      // Request ke GAS
-      const result = await apiRequest("submit", data);
-
-      if (result.status === "success") {
-        msg.textContent = "Berhasil disimpan!";
-        form.reset();
-      } else {
-        msg.textContent = "Gagal: " + (result.message || "Unknown error");
-      }
-    } catch (err) {
-      console.error("Submit error:", err);
-      msg.textContent = "Error: " + err.message;
+    if (!text) {
+        msg.textContent = "Curhat tidak boleh kosong.";
+        return;
     }
-  });
-})();
+
+    const fd = new FormData();
+    fd.append("curhat", text);
+    if (foto) fd.append("foto", foto);
+
+    try {
+        const res = await fetch(API_URL, {
+            method: "POST",
+            body: fd
+        });
+
+        const json = await res.json();
+
+        if (json.ok) {
+            msg.textContent = "Curhat terkirim! 🙏";
+            document.getElementById("curhat").value = "";
+            document.getElementById("foto").value = "";
+        } else {
+            msg.textContent = "Gagal: " + json.error;
+        }
+    } catch (err) {
+        msg.textContent = "Error: " + err.message;
+    }
+});
