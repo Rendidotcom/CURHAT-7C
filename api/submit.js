@@ -1,70 +1,60 @@
-// /api/submit.js — FINAL FIXED VERSION (Next.js + GAS FormData Compatible)
-
 export const config = {
-  api: { bodyParser: false }
+  runtime: "edge"
 };
 
-import formidable from "formidable";
-import fs from "fs";
-
-// Fix penting: Node.js butuh FormData & Blob dari undici
-import { FormData, Blob } from "undici";
-
-export default async function handler(req, res) {
-  if (req.method !== "POST") {
-    return res.status(405).json({ ok: false, error: "Method Not Allowed" });
-  }
-
+export default async function handler(req) {
   try {
-    // Parse multipart/form-data dari form browser
-    const form = formidable({ multiples: false });
-
-    const { fields, files } = await new Promise((resolve, reject) => {
-      form.parse(req, (err, fields, files) =>
-        err ? reject(err) : resolve({ fields, files })
-      );
-    });
-
-    const curhat = (fields.curhat || "").trim();
-
-    if (!curhat) {
-      return res.status(400).json({ ok: false, error: "Curhat kosong" });
-    }
-
-    // Siapkan FormData ke GAS
-    const fd = new FormData();
-    fd.append("curhat", curhat);
-
-    // Jika ada upload foto → kirim sebagai Blob supaya terbaca di GAS
-    if (files.foto) {
-      const img = files.foto;
-      const buffer = fs.readFileSync(img.filepath);
-
-      fd.append(
-        "foto",
-        new Blob([buffer]), // penting untuk GAS
-        img.originalFilename || "upload.png"
+    if (req.method !== "POST") {
+      return new Response(
+        JSON.stringify({ ok: false, error: "Method not allowed" }),
+        { status: 405 }
       );
     }
 
-    // GAS Web App URL
+    // Ambil FormData dari request
+    const formData = await req.formData();
+    const curhat = formData.get("curhat") || "";
+
+    if (!curhat.trim()) {
+      return new Response(
+        JSON.stringify({ ok: false, error: "Curhat kosong" }),
+        { status: 400 }
+      );
+    }
+
+    // Ambil file jika ada
+    const foto = formData.get("foto");
+
+    const sendData = new FormData();
+    sendData.append("curhat", curhat);
+
+    if (foto && typeof foto === "object") {
+      // forward file ke GAS
+      sendData.append("foto", foto, foto.name || "upload.png");
+    }
+
+    // === URL GAS PUNYA KAMU ===
     const GAS_URL =
-      "https://script.google.com/macros/s/AKfycbz1DnqznxmQMgOg7NB7N7Himp6yPmfBwqfjkBC2KMIg06Q7SVdQL5DSCMet5ibTo4OutQ/exec";
+      "https://script.google.com/macros/s/AKfycbz1DnqznxmQMgOg7NB7N7Himp6yPmfBwqfjbBC2KMIgO6Q7SVdQL5DSCMexxxxx/exec";
 
-    // Kirim multipart ke GAS
+    // Forward ke GAS
     const gasRes = await fetch(GAS_URL, {
       method: "POST",
-      body: fd
+      body: sendData
     });
 
-    const gasJSON = await gasRes.json();
+    // Terima JSON murni dari GAS
+    const json = await gasRes.json();
 
-    return res.status(200).json(gasJSON);
+    return new Response(JSON.stringify(json), {
+      status: 200,
+      headers: { "Content-Type": "application/json" }
+    });
 
   } catch (err) {
-    return res.status(500).json({
-      ok: false,
-      error: "Server Error: " + err.message
-    });
+    return new Response(
+      JSON.stringify({ ok: false, error: err.toString() }),
+      { status: 500 }
+    );
   }
 }
