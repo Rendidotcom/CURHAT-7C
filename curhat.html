@@ -1,75 +1,123 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="UTF-8">
-<title>Curhat 7C</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Curhat Kamu</title>
+
 <style>
-body { font-family: Arial; background:#eef2f7; padding:20px; }
-.box { background:white; padding:20px; border-radius:10px; }
-button { padding:10px 20px; background:#2979ff; color:white; border:none; border-radius:6px; }
+  body {
+    font-family: Arial, sans-serif;
+    background: #eef2f7;
+    padding: 20px;
+  }
+  .container {
+    max-width: 680px;
+    margin: auto;
+    background: #fff;
+    padding: 25px;
+    border-radius: 14px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  }
+  textarea {
+    width: 100%;
+    height: 160px;
+    padding: 12px;
+    border-radius: 10px;
+    border: 1px solid #ccc;
+    resize: vertical;
+    font-size: 15px;
+  }
+  button {
+    margin-top: 20px;
+    background: #0066ff;
+    border: none;
+    padding: 14px 20px;
+    color: white;
+    border-radius: 10px;
+    width: 120px;
+    cursor: pointer;
+    font-size: 16px;
+  }
+  #status {
+    margin-top: 15px;
+    font-size: 14px;
+  }
 </style>
 </head>
-<body>
 
-<div class="box">
+<body>
+<div class="container">
   <h2>Curhat Kamu</h2>
 
-  <textarea id="curhat" placeholder="Tulis curhat kamu..." rows="5" style="width:100%;"></textarea>
+  <textarea id="curhat" placeholder="Tulis curhat kamu di sini..."></textarea>
+
+  <p><b>Upload Foto (opsional):</b></p>
+  <input type="file" id="photoInput" accept="image/*" />
+
   <br><br>
+  <button onclick="submitCurhat()">Kirim</button>
 
-  <input type="file" id="foto">
-  <br><br>
-
-  <button onclick="kirim()">Kirim</button>
-
-  <p id="msg"></p>
+  <div id="status"></div>
 </div>
 
 <script>
-const API_URL = "https://script.google.com/macros/s/AKfycbyXDzwArjQFHK_87q5uqoJ5aTALXQXmE-UeVGmRyEoTimZ1rjQ5Z4bFeSjmqYHfUEFw/exec?action=submit";
+  async function submitCurhat() {
+    const status = document.getElementById("status");
+    const curhatText = document.getElementById("curhat").value.trim();
+    const fileInput = document.getElementById("photoInput");
 
-async function kirim() {
-  const msg = document.getElementById("msg");
-  msg.innerText = "Mengirim...";
+    if (!curhatText) {
+      status.innerHTML = "<span style='color:red;'>Curhat tidak boleh kosong!</span>";
+      return;
+    }
 
-  const curhat = document.getElementById("curhat").value;
-  const fotoInput = document.getElementById("foto");
-  
-  let photoBase64 = "";
-  let photoName = "";
+    status.innerHTML = "Mengirim...";
 
-  if (fotoInput.files.length > 0) {
-    const file = fotoInput.files[0];
-    photoName = file.name;
+    let base64Photo = "";
+    let photoName = "";
 
-    const reader = new FileReader();
-    reader.onload = async () => {
-      photoBase64 = reader.result.split(",")[1];
-      await submitData(curhat, photoBase64, photoName);
+    // Jika ada foto, convert ke Base64
+    if (fileInput.files.length > 0) {
+      const file = fileInput.files[0];
+      photoName = file.name;
+
+      base64Photo = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    }
+
+    // Payload dikirim ke Vercel API
+    const payload = {
+      curhat: curhatText,
+      photo: base64Photo,   // kosong jika tidak ada foto
+      photoName: photoName
     };
-    reader.readAsDataURL(file);
-  } else {
-    await submitData(curhat, "", "");
+
+    try {
+      const response = await fetch("/api/submit", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+
+      const result = await response.json();
+
+      if (result.ok) {
+        status.innerHTML = "<span style='color:green;'>Curhat berhasil dikirim!</span>";
+        document.getElementById("curhat").value = "";
+        document.getElementById("photoInput").value = "";
+      } else {
+        status.innerHTML = "<span style='color:red;'>Gagal: " + result.error + "</span>";
+      }
+    } catch (err) {
+      status.innerHTML = "<span style='color:red;'>Error jaringan</span>";
+      console.error(err);
+    }
   }
-}
-
-async function submitData(curhat, photo, photoName) {
-  const msg = document.getElementById("msg");
-
-  const response = await fetch(API_URL, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      curhat,
-      photo,
-      photoName
-    })
-  });
-
-  const result = await response.json();
-  msg.innerText = result.ok ? "Berhasil dikirim!" : "Gagal: " + result.error;
-}
 </script>
 
 </body>

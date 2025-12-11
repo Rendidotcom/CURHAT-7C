@@ -1,34 +1,19 @@
-// api/submit.js — FINAL CLEAN & SYNC WITH GAS
+// api/submit.js (Vercel)
 import { API_URL } from "../config.js";
 
 export default async function handler(req, res) {
-
-  // hanya menerima POST
-  if (req.method !== "POST") {
-    return res.status(405).json({
-      error: "Method not allowed"
-    });
-  }
+  if (req.method !== "POST") return res.status(405).json({ error: "Method not allowed" });
 
   try {
-    // kirim POST ke GAS
-    const response = await fetch(API_URL + "?action=insert", {
+    const payload = req.body; // expects JSON: { curhat, photo, photoName }
+    const r = await fetch(API_URL + "?action=insert", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        nama: req.body.nama || "",
-        curhat: req.body.pesan || req.body.curhat || ""
-      }),
+      body: JSON.stringify(payload)
     });
-
-    const result = await response.json();
-
-    return res.status(200).json(result);
-
+    const data = await r.json();
+    return res.status(200).json(data);
   } catch (err) {
-    return res.status(500).json({
-      error: "Gagal mengirim",
-      detail: err.message
-    });
+    return res.status(500).json({ error: true, message: err.message });
   }
 }
