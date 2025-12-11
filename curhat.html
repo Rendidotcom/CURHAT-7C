@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Curhat 7C</title>
+<title>Curhat Anonim</title>
 
 <style>
     body {
@@ -30,6 +30,9 @@
         font-size: 15px;
         resize: vertical;
     }
+    input[type="file"] {
+        margin-top: 12px;
+    }
     button {
         margin-top: 15px;
         width: 100%;
@@ -49,23 +52,16 @@
         text-align: center;
         font-weight: 600;
     }
-    .user-box {
-        background: white;
-        padding: 12px;
-        border-radius: 10px;
-        margin-bottom: 15px;
-        border-left: 4px solid #0066ff;
-    }
 </style>
 </head>
 
 <body>
 <div class="container">
-    <h2>Curhat 7C</h2>
+    <h2>Curhat Anonim 7C</h2>
 
-    <div id="userInfo" class="user-box"></div>
+    <textarea id="curhat" placeholder="Tulis curhatmu di sini... (anonim)"></textarea>
 
-    <textarea id="curhat" placeholder="Tulis curhatmu di sini..."></textarea>
+    <input type="file" id="foto" accept="image/*" />
 
     <button id="submitBtn">Kirim Curhat</button>
 
@@ -75,19 +71,6 @@
 <!-- CONFIG + SUBMIT -->
 <script src="js/config.js"></script>
 <script src="js/submit.js"></script>
-
-<script>
-    // === LOAD SESSION ===
-    const session = JSON.parse(localStorage.getItem("familyUser") || "null");
-    if (!session) {
-        alert("Silakan login dulu.");
-        location.href = "login.html";
-    }
-
-    document.getElementById("userInfo").innerHTML =
-        `<b>Halo, ${session.name || "Pengguna"}!</b><br>Kamu bisa curhat dengan aman di sini.`;
-
-</script>
 
 </body>
 </html>
