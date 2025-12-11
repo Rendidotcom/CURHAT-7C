@@ -1,30 +1,37 @@
-document.getElementById("curhatForm").addEventListener("submit", async (e) => {
-  e.preventDefault();
+// submit.js — FINAL ANONIM + FOTO WORKING
+document.getElementById("submitBtn").addEventListener("click", async () => {
+    const msg = document.getElementById("msg");
+    const text = document.getElementById("curhat").value.trim();
+    const foto = document.getElementById("foto").files[0];
 
-  const API = "https://script.google.com/macros/s/AKfycbzyQzbKwHKgjOAQWWYs4loX7YadF75CSVpUdvjtoflcx1ri699KfcYZSU4rqFzXWFhfUw/exec";
+    msg.textContent = "Mengirim...";
 
-  const formData = new FormData();
+    if (!text) {
+        msg.textContent = "Curhat tidak boleh kosong.";
+        return;
+    }
 
-  formData.append("curhat", document.getElementById("curhat").value);
+    const fd = new FormData();
+    fd.append("curhat", text);
+    if (foto) fd.append("foto", foto); // NAMA HARUS 'foto'
 
-  const fotoFile = document.getElementById("foto").files[0];
-  if (fotoFile) {
-    formData.append("foto", fotoFile);  // <--- WAJIB EXACT "foto"
-  }
+    try {
+        const res = await fetch(API_URL, {
+            method: "POST",
+            body: fd   // NO HEADERS !!
+        });
 
-  const res = await fetch(API, {
-    method: "POST",
-    body: formData,
-  });
+        const json = await res.json();
+        console.log(json);
 
-  const data = await res.json();
-
-  console.log("RESP:", data);
-
-  if (data.ok) {
-    alert("Curhat tersimpan!");
-    document.getElementById("curhatForm").reset();
-  } else {
-    alert("Gagal: " + data.error);
-  }
+        if (json.ok) {
+            msg.textContent = "Curhat terkirim!";
+            document.getElementById("curhat").value = "";
+            document.getElementById("foto").value = "";
+        } else {
+            msg.textContent = "Gagal: " + json.error;
+        }
+    } catch (err) {
+        msg.textContent = "Error: " + err.message;
+    }
 });
