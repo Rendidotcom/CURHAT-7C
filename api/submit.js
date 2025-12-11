@@ -35,7 +35,7 @@ export default async function handler(req) {
 
     // === URL GAS PUNYA KAMU ===
     const GAS_URL =
-      "https://script.google.com/macros/s/AKfycbz1DnqznxmQMgOg7NB7N7Himp6yPmfBwqfjbBC2KMIgO6Q7SVdQL5DSCMexxxxx/exec";
+      "https://script.google.com/macros/s/AKfycbz1DnqznxmQMgOg7NB7N7Himp6yPmfBwqfjkBC2KMIg06Q7SVdQL5DSCMet5ibTo4OutQ/exec";
 
     // Forward ke GAS
     const gasRes = await fetch(GAS_URL, {
