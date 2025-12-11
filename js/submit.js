@@ -1,37 +1,24 @@
-// submit.js — FINAL ANONIM + FOTO WORKING
-document.getElementById("submitBtn").addEventListener("click", async () => {
-    const msg = document.getElementById("msg");
-    const text = document.getElementById("curhat").value.trim();
-    const foto = document.getElementById("foto").files[0];
+document.getElementById("curhatForm").addEventListener("submit", async function (e) {
+  e.preventDefault();
 
-    msg.textContent = "Mengirim...";
+  const text = document.getElementById("curhat").value;
+  const file = document.getElementById("foto").files[0];
 
-    if (!text) {
-        msg.textContent = "Curhat tidak boleh kosong.";
-        return;
-    }
+  const fd = new FormData();
+  fd.append("curhat", text);
+  if (file) fd.append("foto", file);   // NAMA HARUS "foto"
 
-    const fd = new FormData();
-    fd.append("curhat", text);
-    if (foto) fd.append("foto", foto); // NAMA HARUS 'foto'
+  const res = await fetch(API_URL, {
+    method: "POST",
+    body: fd,
+  });
 
-    try {
-        const res = await fetch(API_URL, {
-            method: "POST",
-            body: fd   // NO HEADERS !!
-        });
+  const data = await res.json();
+  console.log(data);
 
-        const json = await res.json();
-        console.log(json);
-
-        if (json.ok) {
-            msg.textContent = "Curhat terkirim!";
-            document.getElementById("curhat").value = "";
-            document.getElementById("foto").value = "";
-        } else {
-            msg.textContent = "Gagal: " + json.error;
-        }
-    } catch (err) {
-        msg.textContent = "Error: " + err.message;
-    }
+  if (data.ok) {
+    alert("Curhat terkirim!");
+  } else {
+    alert("Error: " + data.error);
+  }
 });
