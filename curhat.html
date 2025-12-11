@@ -1,131 +1,144 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Curhat 7C</title>
 
 <style>
     body {
         font-family: system-ui, Arial;
-        background: #f2f4f7;
-        padding: 20px;
+        background: #f5f7fa;
         margin: 0;
+        padding: 20px;
+        display: flex;
+        justify-content: center;
     }
     .container {
+        width: 100%;
         max-width: 480px;
-        margin: auto;
         background: white;
-        padding: 20px;
+        padding: 24px;
         border-radius: 14px;
-        box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+        box-shadow: 0 5px 20px rgba(0,0,0,0.08);
     }
     h2 {
-        margin-top: 0;
         text-align: center;
-        color: #333;
+        margin-top: 0;
     }
-    textarea {
-        width: 100%;
-        min-height: 140px;
-        padding: 12px;
-        font-size: 15px;
-        border: 1px solid #ccc;
-        border-radius: 8px;
-        resize: vertical;
+    label {
+        font-weight: 600;
+        margin-top: 10px;
+        display: block;
     }
-    input {
+    input, textarea {
         width: 100%;
         padding: 12px;
-        font-size: 15px;
-        border: 1px solid #ccc;
         border-radius: 8px;
-        margin-top: 8px;
+        border: 1px solid #ccc;
+        margin-top: 6px;
+        font-size: 16px;
     }
     button {
         width: 100%;
         padding: 14px;
-        font-size: 16px;
-        margin-top: 14px;
-        background: #0c7df2;
-        border: none;
-        border-radius: 8px;
+        background: #0067ff;
         color: white;
+        border: none;
+        border-radius: 10px;
+        font-size: 17px;
+        margin-top: 20px;
         cursor: pointer;
     }
-    button:hover {
-        background: #0a6ad1;
-    }
     #msg {
-        margin-top: 16px;
+        margin-top: 12px;
         text-align: center;
-        font-size: 15px;
+        font-weight: bold;
+    }
+    #preview {
+        margin-top: 10px;
+        max-width: 120px;
+        display: none;
+        border-radius: 8px;
     }
 </style>
 </head>
+
 <body>
 
 <div class="container">
     <h2>Curhat 7C</h2>
 
-    <label>Nama (opsional)</label>
-    <input type="text" id="nama" placeholder="Isi nama boleh kosong">
-
     <label>Curhat kamu</label>
-    <textarea id="curhat" placeholder="Tulis curhat kamu di sini..."></textarea>
+    <textarea id="curhat" rows="5" placeholder="Tulis curhatmu di sini... (anonim)"> </textarea>
 
-    <button onclick="submitCurhat()">Kirim Curhat</button>
+    <label>Upload Foto (opsional)</label>
+    <input id="foto" type="file" accept="image/*">
+
+    <img id="preview">
+
+    <button id="btnKirim">Kirim Curhat</button>
 
     <div id="msg"></div>
 </div>
 
-<!-- load config -->
-<script src="config.js"></script>
+<!-- import API -->
+<script type="module">
+import { submitCurhat } from "./api/submit.js";
 
-<!-- submit logic -->
-<script>
-async function submitCurhat() {
-    const nama = document.getElementById("nama").value.trim();
-    const curhat = document.getElementById("curhat").value.trim();
-    const msg = document.getElementById("msg");
+const curhat = document.getElementById("curhat");
+const foto = document.getElementById("foto");
+const preview = document.getElementById("preview");
+const msg = document.getElementById("msg");
 
+// preview foto
+foto.addEventListener("change", () => {
+    const file = foto.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = e => {
+        preview.src = e.target.result;
+        preview.style.display = "block";
+    };
+    reader.readAsDataURL(file);
+});
+
+// klik kirim
+document.getElementById("btnKirim").onclick = async () => {
+    msg.style.color = "black";
     msg.textContent = "Mengirim...";
-    msg.style.color = "#555";
 
-    if (!curhat) {
-        msg.textContent = "Curhat tidak boleh kosong.";
-        msg.style.color = "red";
-        return;
-    }
+    const file = foto.files[0];
+    let base64 = "";
+    let photoName = "";
 
-    try {
-        const res = await fetch(window.API_URL, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                action: "submit",
-                nama,
-                curhat
-            })
+    if (file) {
+        const reader = new FileReader();
+        base64 = await new Promise(resolve => {
+            reader.onload = e => resolve(e.target.result);
+            reader.readAsDataURL(file);
         });
-
-        const json = await res.json(); // wajib JSON
-
-        if (json.ok) {
-            msg.textContent = "Curhat berhasil dikirim ✔";
-            msg.style.color = "green";
-
-            document.getElementById("curhat").value = "";
-        } else {
-            msg.textContent = "Gagal: " + (json.error || "Terjadi kesalahan");
-            msg.style.color = "red";
-        }
-
-    } catch (err) {
-        msg.textContent = "Error koneksi: " + err.message;
-        msg.style.color = "red";
+        photoName = file.name;
     }
-}
+
+    const result = await submitCurhat({
+        curhat: curhat.value,
+        photo: base64,
+        photoName
+    });
+
+    if (result.ok) {
+        msg.style.color = "green";
+        msg.textContent = "Berhasil dikirim!";
+        curhat.value = "";
+        foto.value = "";
+        preview.style.display = "none";
+    } else {
+        msg.style.color = "red";
+        msg.textContent = "Error koneksi: " + (result.error || "Failed to fetch");
+    }
+};
 </script>
 
 </body>
