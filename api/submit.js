@@ -1,8 +1,6 @@
-// /api/submit.js — FINAL STABLE VERSION
+// /api/submit.js — FINAL FIXED VERSION (GAS-Compatible)
 export const config = {
-  api: {
-    bodyParser: false, // wajib agar bisa terima FormData
-  },
+  api: { bodyParser: false }
 };
 
 import formidable from "formidable";
@@ -14,14 +12,13 @@ export default async function handler(req, res) {
   }
 
   try {
-    // Parse FormData (curhat + foto)
+    // Parse FormData dari browser
     const form = formidable({ multiples: false });
 
     const { fields, files } = await new Promise((resolve, reject) => {
-      form.parse(req, (err, fields, files) => {
-        if (err) reject(err);
-        else resolve({ fields, files });
-      });
+      form.parse(req, (err, fields, files) =>
+        err ? reject(err) : resolve({ fields, files })
+      );
     });
 
     const curhat = fields.curhat || "";
@@ -30,39 +27,39 @@ export default async function handler(req, res) {
       return res.status(400).json({ ok: false, error: "Curhat kosong" });
     }
 
-    let photoBase64 = "";
-    let photoName = "";
+    // --- KIRIM KE GAS DALAM BENTUK FORMDATA (bukan JSON) ---
+    const formData = new FormData();
+    formData.append("curhat", curhat);
 
-    // Jika ada foto
+    // Jika ada foto → kirim sebagai Blob agar GAS terbaca e.files.foto
     if (files.foto) {
       const file = files.foto;
-      const fileData = fs.readFileSync(file.filepath);
-      photoBase64 = Buffer.from(fileData).toString("base64");
-      photoName = file.originalFilename || "upload.png";
+      const fileBuffer = fs.readFileSync(file.filepath);
+
+      formData.append(
+        "foto",
+        new Blob([fileBuffer]),
+        file.originalFilename || "upload.png"
+      );
     }
 
     // GAS Web App URL
     const GAS_URL =
-      "https://script.google.com/macros/s/AKfycbz1DnqznxmQMgOg7NB7N7Himp6yPmfBwqfjkBC2KMIg06Q7SVdQL5DSCMet5ibTo4OutQ/exec?action=insert";
+      "https://script.google.com/macros/s/AKfycbz1DnqznxmQMgOg7NB7N7Himp6yPmfBwqfjkBC2KMIg06Q7SVdQL5DSCMet5ibTo4OutQ/exec";
 
-    // Kirim ke GAS sebagai JSON
+    // Kirim ke GAS sebagai multipart/form-data
     const gasRes = await fetch(GAS_URL, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        curhat,
-        photo: photoBase64,
-        photoName,
-      }),
+      body: formData
     });
 
-    const gasJson = await gasRes.json();
+    const gasJSON = await gasRes.json();
+    return res.status(200).json(gasJSON);
 
-    return res.status(200).json(gasJson);
   } catch (err) {
     return res.status(500).json({
       ok: false,
-      error: "Server Error: " + err.toString(),
+      error: "Server Error: " + err.toString()
     });
   }
 }
