@@ -1,23 +1,21 @@
-// api/submit.js — FINAL CLEAN & SYNC WITH GAS
+// api/curhat.js — FINAL CLEAN VERSION
 import { API_URL } from "../config.js";
 
 export default async function handler(req, res) {
 
   // hanya menerima POST
   if (req.method !== "POST") {
-    return res.status(405).json({
-      error: "Method not allowed"
-    });
+    return res.status(405).json({ error: "Method Not Allowed" });
   }
 
   try {
-    // kirim POST ke GAS
+    // kirim ke GAS dengan action=insert
     const response = await fetch(API_URL + "?action=insert", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         nama: req.body.nama || "",
-        curhat: req.body.pesan || req.body.curhat || ""
+        curhat: req.body.curhat || req.body.pesan || ""
       }),
     });
 
