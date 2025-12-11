@@ -1,8 +1,8 @@
-const API_URL = "https://script.google.com/macros/s/AKfycbxVqSFLXhfuZ0jpgzjTOAva2R1yfX8zA5PUpaJ0H9TVB4RKyi2kTmKAv4sPLNfDQFTU/exec";
+import { API_URL } from "../config.js";
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {
-    return res.status(405).json({ error: "Method tidak diizinkan" });
+    return res.status(405).json({ error: "Method not allowed" });
   }
 
   try {
@@ -13,13 +13,13 @@ export default async function handler(req, res) {
         action: "submitCurhat",
         nama: req.body.nama,
         pesan: req.body.pesan
-      })
+      }),
     });
 
     const result = await response.json();
     return res.status(200).json(result);
 
   } catch (err) {
-    return res.status(500).json({ error: true, message: err.message });
+    return res.status(500).json({ error: "Gagal mengirim", detail: err.message });
   }
 }
