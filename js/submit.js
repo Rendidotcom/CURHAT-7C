@@ -1,9 +1,9 @@
-// submit.js — FINAL BASE64 SUPPORT (Vercel + GAS)
+// submit.js — FINAL FORM-DATA (WORKING)
 
 document.getElementById("submitBtn").addEventListener("click", async () => {
     const msg = document.getElementById("msg");
     const text = document.getElementById("curhat").value.trim();
-    const fotoFile = document.getElementById("foto").files[0];
+    const foto = document.getElementById("foto").files[0];
 
     msg.textContent = "Mengirim...";
 
@@ -12,45 +12,26 @@ document.getElementById("submitBtn").addEventListener("click", async () => {
         return;
     }
 
-    let fotoBase64 = "";
-    let fotoName = "";
+    const fd = new FormData();
+    fd.append("curhat", text);
+    if (foto) fd.append("foto", foto);
 
-    // Jika ada foto → ubah ke Base64 dulu
-    if (fotoFile) {
-        const reader = new FileReader();
-        reader.onload = async () => {
-            fotoBase64 = reader.result.split(",")[1]; // > Base64 only
-            fotoName = fotoFile.name;
-            await sendRequest();
-        };
-        reader.readAsDataURL(fotoFile);
-    } else {
-        sendRequest();
-    }
+    try {
+        const res = await fetch(API_URL, {
+            method: "POST",
+            body: fd
+        });
 
-    async function sendRequest() {
-        try {
-            const res = await fetch(window.API_URL, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    curhat: text,
-                    fotoBase64,
-                    fotoName
-                })
-            });
+        const json = await res.json();
 
-            const json = await res.json();
-
-            if (json.ok) {
-                msg.textContent = "Curhat terkirim! 🙏";
-                document.getElementById("curhat").value = "";
-                document.getElementById("foto").value = "";
-            } else {
-                msg.textContent = "Gagal: " + json.error;
-            }
-        } catch (err) {
-            msg.textContent = "Error: " + err.message;
+        if (json.ok) {
+            msg.textContent = "Curhat terkirim! 🙏";
+            document.getElementById("curhat").value = "";
+            document.getElementById("foto").value = "";
+        } else {
+            msg.textContent = "Gagal: " + json.error;
         }
+    } catch (err) {
+        msg.textContent = "Error: " + err.message;
     }
 });
