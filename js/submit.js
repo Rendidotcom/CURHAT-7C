@@ -1,39 +1,54 @@
-// submit.js — FINAL MULTIPART (2025)
+// ===========================
+// submit.js — FINAL FIXED
+// ===========================
 
-const btn = document.getElementById("submitBtn");
-const msg = document.getElementById("msg");
+document.getElementById("submitBtn").addEventListener("click", async () => {
 
-btn.addEventListener("click", async () => {
+    const msg = document.getElementById("msg");
     msg.textContent = "Mengirim...";
 
     const text = document.getElementById("curhat").value.trim();
     const foto = document.getElementById("foto").files[0];
 
     if (!text) {
-        msg.textContent = "Tulisan tidak boleh kosong!";
+        msg.textContent = "Isi curhat dulu.";
         return;
     }
 
-    const fd = new FormData();
-    fd.append("curhat", text);
-    if (foto) fd.append("foto", foto);
-
     try {
+        // ============================================================
+        // 1. KIRIM MODE MULTIPART (FormData) — cocok dengan GAS kamu
+        // ============================================================
+        const fd = new FormData();
+        fd.append("mode", "curhat");
+        fd.append("curhat", text);
+
+        if (foto) {
+            fd.append("foto", foto, foto.name);
+        }
+
         const res = await fetch(API_URL, {
             method: "POST",
             body: fd,
         });
 
-        const out = await res.json();
+        const out = await res.json().catch(() => null);
 
-        if (out.ok) {
-            msg.textContent = "✔ Curhat terkirim!";
-            document.getElementById("curhat").value = "";
-            document.getElementById("foto").value = "";
-        } else {
-            msg.textContent = "Gagal: " + out.error;
+        if (!out || out.ok !== true) {
+            msg.textContent = "Gagal: " + (out?.error || "UNKNOWN_RESPONSE");
+            return;
         }
+
+        msg.textContent = out.msg || "Terkirim ✔";
+        if (out.fotoURL) {
+            console.log("Foto URL:", out.fotoURL);
+        }
+
+        // Reset form
+        document.getElementById("curhat").value = "";
+        document.getElementById("foto").value = "";
+
     } catch (err) {
-        msg.textContent = "Error jaringan: " + err.message;
+        msg.textContent = "ERROR: " + err.message;
     }
 });
