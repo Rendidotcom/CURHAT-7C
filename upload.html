@@ -26,7 +26,7 @@
 
 <script>
 // ====== MASUKKAN URL GAS MILIK KAMU DI SINI ======
-const API_URL = "https://script.google.com/macros/s/AKfycbxIaHIswOMJe6wYzg4omMohq6piUpRIlKShFU1tqGGdcAlpshuXhUnU_qvs98iuf6fNeQ/exec"; 
+const API_URL = window.API_URL;
 
 document.getElementById("btnUpload").addEventListener("click", async () => {
 
@@ -69,6 +69,8 @@ document.getElementById("btnUpload").addEventListener("click", async () => {
     }
 });
 </script>
+<script src="js/config.js"></script>
+<script src="js/upload.js"></script>
 
 </body>
 </html>

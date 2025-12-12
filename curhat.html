@@ -132,7 +132,7 @@
 // =============================
 //  UPDATE SESUAI GAS KAMU
 // =============================
-const API_URL = "https://script.google.com/macros/s/AKfycbxIaHIswOMJe6wYzg4omMohq6piUpRIlKShFU1tqGGdcAlpshuXhUnU_qvs98iuf6fNeQ/exec";
+const API_URL = window.API_URL;
 
 // Preview foto
 document.getElementById("foto").addEventListener("change", function () {
@@ -192,6 +192,8 @@ document.getElementById("curhatForm").addEventListener("submit", async (e) => {
     btn.disabled = false;
 });
 </script>
+<script src="js/config.js"></script>
+<script src="js/upload.js"></script>
 
 </body>
 </html>
