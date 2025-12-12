@@ -1,40 +1,32 @@
-document.addEventListener("DOMContentLoaded", () => {
-  const form = document.getElementById("uploadForm");
-  const msg = document.getElementById("msg");
-
-  form.addEventListener("submit", async (e) => {
+// upload.js — FINAL UPLOAD FOTO TEST (multipart/form-data)
+document.getElementById("uploadForm").addEventListener("submit", async function (e) {
     e.preventDefault();
 
-    msg.textContent = "Mengupload...";
+    const msg = document.getElementById("msg");
+    msg.textContent = "Mengirim...";
 
-    const fd = new FormData();
+    const text = document.getElementById("curhat").value.trim();
     const file = document.getElementById("foto").files[0];
 
-    if (!file) {
-      msg.textContent = "Pilih foto dulu.";
-      return;
-    }
-
-    fd.append("foto", file);
+    const fd = new FormData();
+    fd.append("curhat", text);
+    if (file) fd.append("foto", file); // NAMA WAJIB "foto"
 
     try {
-      const res = await fetch(window.API_URL, {
-        method: "POST",
-        body: fd
-      });
+        const res = await fetch(window.API_URL, {
+            method: "POST",
+            body: fd
+        });
 
-      const data = await res.json();
-      console.log(data);
+        const data = await res.json();
+        console.log(data);
 
-      if (data.ok) {
-        msg.innerHTML = `Foto berhasil diupload!<br>
-                         <a href="${data.fotoURL}" target="_blank">Lihat Foto</a>`;
-      } else {
-        msg.textContent = "Error: " + data.error;
-      }
-
+        if (data.ok) {
+            msg.textContent = "✔ Berhasil! Foto & curhat terkirim.";
+        } else {
+            msg.textContent = "❌ Error: " + data.error;
+        }
     } catch (err) {
-      msg.textContent = "Fetch error: " + err.message;
+        msg.textContent = "❌ Fetch error: " + err;
     }
-  });
 });
