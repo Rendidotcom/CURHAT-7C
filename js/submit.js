@@ -1,4 +1,4 @@
-// submit.js — FINAL SINKRON GAS
+// submit.js — FINAL SINKRON GAS (NO ACTION, NO MODE)
 
 document.getElementById("curhatForm").addEventListener("submit", async function (e) {
   e.preventDefault();
@@ -14,11 +14,10 @@ document.getElementById("curhatForm").addEventListener("submit", async function 
     return;
   }
 
-  // Wajib ada untuk router GAS
+  // FormData wajib — multipart
   const fd = new FormData();
-  fd.append("action", "curhat");       // ★ KUNCI PENTING ★
-  fd.append("curhat", text);           // nama kolom sinkron sheet
-  if (foto) fd.append("foto", foto);   // opsi
+  fd.append("curhat", text);
+  if (foto) fd.append("foto", foto);
 
   try {
     const res = await fetch(API_URL, {
