@@ -1,199 +1,108 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Curhat Anonim</title>
-
-<!-- GOOGLE FONTS -->
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Curhat 7C - Kirim Curhat</title>
 <style>
-    body {
-        font-family: "Inter", sans-serif;
-        background: #f2f4f7;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        min-height: 100vh;
-        padding: 20px;
-    }
-
-    .box {
-        width: 100%;
-        max-width: 420px;
-        background: #fff;
-        border-radius: 20px;
-        padding: 28px;
-        box-shadow: 0 8px 20px rgba(0,0,0,0.08);
-        text-align: center;
-    }
-
-    .title {
-        font-size: 22px;
-        font-weight: 700;
-        margin-bottom: 4px;
-    }
-
-    .subtitle {
-        font-size: 14px;
-        color: #5a5a5a;
-        margin-bottom: 20px;
-    }
-
-    .cartoon {
-        width: 120px;
-        margin: 0 auto 18px auto;
-        display: block;
-    }
-
-    textarea {
-        width: 100%;
-        height: 140px;
-        padding: 14px;
-        border-radius: 14px;
-        border: 1px solid #ccd0d8;
-        outline: none;
-        font-size: 15px;
-        resize: none;
-    }
-
-    textarea:focus {
-        border-color: #4465ff;
-        box-shadow: 0 0 0 2px rgba(68, 101, 255, 0.2);
-    }
-
-    input[type="file"] {
-        margin-top: 15px;
-    }
-
-    #preview {
-        margin-top: 14px;
-        max-width: 100%;
-        display: none;
-        border-radius: 12px;
-    }
-
-    button {
-        width: 100%;
-        margin-top: 20px;
-        padding: 14px;
-        background: #2d54f3;
-        color: white;
-        border: none;
-        font-size: 16px;
-        border-radius: 12px;
-        cursor: pointer;
-        font-weight: 600;
-        transition: 0.2s;
-    }
-
-    button:disabled {
-        opacity: 0.6;
-        cursor: not-allowed;
-    }
-
-    button:hover {
-        background: #1f3ed6;
-    }
-
-    #msg {
-        margin-top: 14px;
-        font-size: 14px;
-    }
+  body {
+    font-family: system-ui, Arial;
+    background: #eef2f7;
+    padding: 20px;
+  }
+  .wrap {
+    max-width: 500px;
+    margin: auto;
+    background: #fff;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+  textarea {
+    width: 100%;
+    height: 150px;
+    padding: 10px;
+    border-radius: 10px;
+    border: 1px solid #ccc;
+    resize: vertical;
+  }
+  input[type="file"] {
+    margin-top: 10px;
+  }
+  button {
+    margin-top: 15px;
+    width: 100%;
+    padding: 12px;
+    font-size: 16px;
+    border: none;
+    border-radius: 10px;
+    background: #007bff;
+    color: white;
+    cursor: pointer;
+  }
+  #msg {
+    margin-top: 15px;
+    font-weight: bold;
+  }
 </style>
-</head>
-
-<body>
-
-<div class="box">
-
-    <img src="https://cdn-icons-png.flaticon.com/512/6596/6596121.png"
-         class="cartoon">
-
-    <div class="title">Curhat Anonim</div>
-    <div class="subtitle">Tulis perasaanmu tanpa takut dihakimi</div>
-
-    <form id="curhatForm">
-        <textarea id="curhat" name="curhat" placeholder="Tulis curhatmu di sini..." required></textarea>
-
-        <input type="file" id="foto" name="foto" accept="image/*">
-
-        <img id="preview">
-
-        <button type="submit" id="btnKirim">Kirim Curhat</button>
-
-        <div id="msg"></div>
-    </form>
-
-</div>
-
+<script src="config.js"></script>
 <script>
-// =============================
-//  UPDATE SESUAI GAS KAMU
-// =============================
-const API_URL = window.API_URL;
+// =========================
+//  CURHAT.html FINAL STABIL
+// =========================
+document.addEventListener("DOMContentLoaded", () => {
+  const form = document.getElementById("formCurhat");
+  const msg = document.getElementById("msg");
 
-// Preview foto
-document.getElementById("foto").addEventListener("change", function () {
-    const file = this.files[0];
-    const preview = document.getElementById("preview");
-
-    if (file) {
-        preview.src = URL.createObjectURL(file);
-        preview.style.display = "block";
-    } else {
-        preview.style.display = "none";
-    }
-});
-
-document.getElementById("curhatForm").addEventListener("submit", async (e) => {
+  form.addEventListener("submit", async (e) => {
     e.preventDefault();
 
-    const msg = document.getElementById("msg");
-    const btn = document.getElementById("btnKirim");
-
-    msg.style.color = "black";
     msg.textContent = "Mengirim...";
-    btn.disabled = true;
 
-    const formData = new FormData();
-    formData.append("curhat", document.getElementById("curhat").value);
-
+    const text = document.getElementById("curhat").value.trim();
     const foto = document.getElementById("foto").files[0];
-    if (foto) formData.append("foto", foto); // sesuai code.gs
 
-    try {
-        const res = await fetch(API_URL, {
-            method: "POST",
-            body: formData
-        });
-
-        const data = await res.json();
-
-        if (data.ok) {
-            msg.style.color = "green";
-            msg.textContent = "Curhat berhasil dikirim!";
-
-            // Reset form
-            document.getElementById("curhatForm").reset();
-            document.getElementById("preview").style.display = "none";
-
-        } else {
-            msg.style.color = "red";
-            msg.textContent = "Error: " + data.error;
-        }
-
-    } catch (err) {
-        msg.style.color = "red";
-        msg.textContent = "Gagal mengirim. Cek koneksi atau URL API.";
+    if (!text) {
+      msg.textContent = "Curhat wajib diisi.";
+      return;
     }
 
-    btn.disabled = false;
+    try {
+      const url = window.API_URL + "?type=curhat-upload";
+
+      const fd = new FormData();
+      fd.append("curhat", text);
+      if (foto) fd.append("foto", foto);
+
+      const r = await fetch(url, { method: "POST", body: fd });
+      const json = await r.json();
+
+      if (json.status === "ok") {
+        msg.textContent = "Berhasil dikirim!";
+        form.reset();
+      } else {
+        msg.textContent = "Gagal: " + (json.message || "Error tidak diketahui");
+      }
+    } catch (err) {
+      msg.textContent = "Error fetch: " + err.message;
+    }
+  });
 });
 </script>
-<script src="js/config.js"></script>
-<script src="js/upload.js"></script>
+</head>
+<body>
+<div class="wrap">
+  <h2>Kirim Curhat</h2>
+  <form id="formCurhat">
+    <label>Tuliskan Curhat:</label>
+    <textarea id="curhat" placeholder="Tulis sesuatu..." required></textarea>
 
+    <label>Upload Foto (opsional):</label><br>
+    <input type="file" id="foto" accept="image/*" />
+
+    <button type="submit">Kirim</button>
+    <div id="msg"></div>
+  </form>
+</div>
 </body>
 </html>

@@ -4,18 +4,20 @@
 <meta charset="UTF-8">
 <title>Upload Foto</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
+
 <style>
-    body{font-family:system-ui;background:#f7f7f7;padding:20px;}
-    h2{text-align:center;margin-bottom:20px;}
-    input, button{width:100%;padding:12px;margin-top:10px;}
-    button{
-        background:#007bff;border:none;color:white;
-        font-size:16px;border-radius:6px;cursor:pointer;
+    body { font-family: system-ui; background:#f5f5f5; padding:20px; }
+    h2 { text-align:center; margin-bottom:20px; }
+    input, button { width:100%; padding:12px; margin-top:10px; }
+    button {
+        background:#0066ff; border:none; color:white;
+        font-size:16px; border-radius:6px; cursor:pointer;
     }
-    button:disabled{background:#999;}
-    #msg{margin-top:15px;text-align:center;font-weight:bold;}
+    button:disabled { background:#999; }
+    #msg { margin-top:15px; text-align:center; font-weight:bold; }
 </style>
 </head>
+
 <body>
 
 <h2>UPLOAD FOTO</h2>
@@ -24,8 +26,15 @@
 <button id="btnUpload">Kirim Foto</button>
 <div id="msg"></div>
 
+<!-- ==========================================
+     CONFIG WAJIB DILETAKKAN SEBELUM SCRIPT UTAMA
+     ========================================== -->
+<script src="js/config.js"></script>
+
 <script>
-// ====== MASUKKAN URL GAS MILIK KAMU DI SINI ======
+// ============================================
+//  FINAL: gunakan window.API_URL dari config.js
+// ============================================
 const API_URL = window.API_URL;
 
 document.getElementById("btnUpload").addEventListener("click", async () => {
@@ -43,20 +52,30 @@ document.getElementById("btnUpload").addEventListener("click", async () => {
     msg.style.color = "black";
 
     const form = new FormData();
-    form.append("foto", foto);
-    form.append("mode", "uploadFoto");   
-    form.append("kelas", "7C");          // masuk ke sheet CURHAT 7C
+    form.append("mode", "uploadFoto");   // wajib → router code.gs
+    form.append("foto", foto);           // wajib → upload foto
 
     try {
         const res = await fetch(API_URL, {
             method: "POST",
-            body: form,
+            body: form
         });
 
-        const data = await res.json();
+        // Coba baca JSON aman
+        const text = await res.text();
+        console.log("RAW RESPONSE:", text);
+
+        let data;
+        try {
+            data = JSON.parse(text);
+        } catch (err) {
+            msg.textContent = "Server tidak mengirim JSON valid.";
+            msg.style.color = "red";
+            return;
+        }
 
         if (data.status === "success") {
-            msg.textContent = "Foto berhasil dikirim!";
+            msg.textContent = "Foto berhasil diupload!";
             msg.style.color = "green";
         } else {
             msg.textContent = "Upload gagal: " + data.message;
@@ -64,13 +83,11 @@ document.getElementById("btnUpload").addEventListener("click", async () => {
         }
 
     } catch (err) {
-        msg.textContent = "ERROR: " + err;
+        msg.textContent = "ERROR FETCH: " + err;
         msg.style.color = "red";
     }
 });
 </script>
-<script src="js/config.js"></script>
-<script src="js/upload.js"></script>
 
 </body>
 </html>
