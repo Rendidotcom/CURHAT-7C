@@ -1,14 +1,16 @@
-// submit.js — FINAL NO LOGIN, ANONIM, SUPPORT FOTO
+// submit.js — FINAL MULTIPART (2025)
 
-document.getElementById("submitBtn").addEventListener("click", async () => {
-    const msg = document.getElementById("msg");
+const btn = document.getElementById("submitBtn");
+const msg = document.getElementById("msg");
+
+btn.addEventListener("click", async () => {
+    msg.textContent = "Mengirim...";
+
     const text = document.getElementById("curhat").value.trim();
     const foto = document.getElementById("foto").files[0];
 
-    msg.textContent = "Mengirim...";
-
     if (!text) {
-        msg.textContent = "Curhat tidak boleh kosong.";
+        msg.textContent = "Tulisan tidak boleh kosong!";
         return;
     }
 
@@ -19,19 +21,19 @@ document.getElementById("submitBtn").addEventListener("click", async () => {
     try {
         const res = await fetch(API_URL, {
             method: "POST",
-            body: fd
+            body: fd,
         });
 
-        const json = await res.json();
+        const out = await res.json();
 
-        if (json.ok) {
-            msg.textContent = "Curhat terkirim! 🙏";
+        if (out.ok) {
+            msg.textContent = "✔ Curhat terkirim!";
             document.getElementById("curhat").value = "";
             document.getElementById("foto").value = "";
         } else {
-            msg.textContent = "Gagal: " + json.error;
+            msg.textContent = "Gagal: " + out.error;
         }
     } catch (err) {
-        msg.textContent = "Error: " + err.message;
+        msg.textContent = "Error jaringan: " + err.message;
     }
 });
