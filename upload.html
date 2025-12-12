@@ -1,34 +1,74 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
 <meta charset="UTF-8">
-<title>Upload Foto Only</title>
+<title>Upload Foto</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-
 <style>
-    body { font-family: Arial; padding: 20px; max-width: 480px; margin: auto; }
-    input { width: 100%; margin-top: 10px; padding: 10px; border: 1px solid #ccc; border-radius: 6px; }
-    button { margin-top: 15px; padding: 12px; width: 100%; background: #007bff; color: white; border: none; border-radius: 6px; }
-    button:hover { background: #0056d2; cursor: pointer; }
-    #msg { margin-top: 20px; color: green; font-weight: bold; }
+    body{font-family:system-ui;background:#f7f7f7;padding:20px;}
+    h2{text-align:center;margin-bottom:20px;}
+    input, button{width:100%;padding:12px;margin-top:10px;}
+    button{
+        background:#007bff;border:none;color:white;
+        font-size:16px;border-radius:6px;cursor:pointer;
+    }
+    button:disabled{background:#999;}
+    #msg{margin-top:15px;text-align:center;font-weight:bold;}
 </style>
 </head>
-
 <body>
 
-<h2>TEST UPLOAD FOTO ONLY</h2>
+<h2>UPLOAD FOTO</h2>
 
-<form id="uploadForm">
-    <label>Foto:</label>
-    <input type="file" id="foto" accept="image/*" required>
+<input type="file" id="foto" accept="image/*">
+<button id="btnUpload">Kirim Foto</button>
+<div id="msg"></div>
 
-    <button type="submit">Kirim Foto</button>
-</form>
+<script>
+// ====== MASUKKAN URL GAS MILIK KAMU DI SINI ======
+const API_URL = "https://script.google.com/macros/s/AKfycbyadiKNp8ZaY8Xt9VfOVXpaDj2CEUePFgxndZY8G3P6mlP62Kd72psQZqY5PkMGFXdAIQ/exec"; 
 
-<p id="msg"></p>
+document.getElementById("btnUpload").addEventListener("click", async () => {
 
-<script src="config.js"></script>
-<script src="upload.js"></script>
+    const msg = document.getElementById("msg");
+    const foto = document.getElementById("foto").files[0];
+
+    if (!foto) {
+        msg.textContent = "Silakan pilih foto.";
+        msg.style.color = "red";
+        return;
+    }
+
+    msg.textContent = "Mengirim foto...";
+    msg.style.color = "black";
+
+    const form = new FormData();
+    form.append("foto", foto);
+    form.append("mode", "uploadFoto");   
+    form.append("kelas", "7C");          // masuk ke sheet CURHAT 7C
+
+    try {
+        const res = await fetch(API_URL, {
+            method: "POST",
+            body: form,
+        });
+
+        const data = await res.json();
+
+        if (data.status === "success") {
+            msg.textContent = "Foto berhasil dikirim!";
+            msg.style.color = "green";
+        } else {
+            msg.textContent = "Upload gagal: " + data.message;
+            msg.style.color = "red";
+        }
+
+    } catch (err) {
+        msg.textContent = "ERROR: " + err;
+        msg.style.color = "red";
+    }
+});
+</script>
 
 </body>
 </html>
