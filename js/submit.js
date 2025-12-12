@@ -1,53 +1,45 @@
-// ========================================================
-//  SUBMIT.JS — FINAL SINKRON DENGAN CURHAT.HTML & GAS
-// ========================================================
+// submit.js — FINAL SINKRON GAS
 
-document.addEventListener("DOMContentLoaded", () => {
+document.getElementById("curhatForm").addEventListener("submit", async function (e) {
+  e.preventDefault();
 
-  const form = document.getElementById("formCurhat");
-  const msg  = document.getElementById("msg");
+  const msg = document.getElementById("msg");
+  msg.textContent = "Mengirim...";
 
-  form.addEventListener("submit", async (e) => {
-    e.preventDefault();
+  const text = document.getElementById("curhat").value.trim();
+  const foto = document.getElementById("foto").files[0];
 
-    msg.textContent = "Mengirim...";
-    msg.style.color = "black";
+  if (!text) {
+    msg.textContent = "Teks curhat wajib diisi.";
+    return;
+  }
 
-    const text = document.getElementById("curhat").value.trim();
-    const foto = document.getElementById("foto").files[0];
+  // Wajib ada untuk router GAS
+  const fd = new FormData();
+  fd.append("action", "curhat");       // ★ KUNCI PENTING ★
+  fd.append("curhat", text);           // nama kolom sinkron sheet
+  if (foto) fd.append("foto", foto);   // opsi
 
-    if (!text) {
-      msg.textContent = "Curhat wajib diisi.";
+  try {
+    const res = await fetch(API_URL, {
+      method: "POST",
+      body: fd
+    });
+
+    const data = await res.json();
+    console.log("RESPON GAS:", data);
+
+    if (data.ok) {
+      msg.style.color = "green";
+      msg.textContent = "Curhat terkirim!";
+      document.getElementById("curhatForm").reset();
+    } else {
       msg.style.color = "red";
-      return;
+      msg.textContent = "Gagal: " + data.error;
     }
-
-    try {
-      const fd = new FormData();
-      fd.append("curhat", text);
-      if (foto) fd.append("foto", foto);   // multipart, nama HARUS "foto"
-
-      const res = await fetch(window.API_URL, {
-        method: "POST",
-        body: fd
-      });
-
-      const data = await res.json();
-      console.log("Response GAS:", data);
-
-      if (data.ok) {
-        msg.textContent = "Berhasil dikirim!";
-        msg.style.color = "green";
-        form.reset();
-      } else {
-        msg.textContent = "Gagal: " + (data.error || data.message);
-        msg.style.color = "red";
-      }
-
-    } catch (err) {
-      msg.textContent = "Fetch Error: " + err.message;
-      msg.style.color = "red";
-    }
-  });
-
+  } catch (err) {
+    console.error(err);
+    msg.style.color = "red";
+    msg.textContent = "ERROR jaringan / API.";
+  }
 });
