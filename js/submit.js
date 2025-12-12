@@ -1,4 +1,3 @@
-// submit.js — FIX SESUAI ROUTER GAS (MULTIPART)
 const API_URL = window.API_URL;
 
 document.getElementById("submitBtn").addEventListener("click", async () => {
@@ -15,38 +14,33 @@ document.getElementById("submitBtn").addEventListener("click", async () => {
     msg.textContent = "Mengirim...";
     msg.style.color = "black";
 
-    const form = new FormData();
-    form.append("curhat", text);   // WAJIB: sesuai router GAS
-    if (foto) form.append("foto", foto);
+    const fd = new FormData();
+    fd.append("curhat", text);     // ← WAJIB: sama dengan router GAS
+    if (foto) fd.append("foto", foto);
 
     try {
-        const res = await fetch(API_URL, { method: "POST", body: form });
+        const res = await fetch(API_URL, {
+            method: "POST",
+            body: fd
+        });
+
         const raw = await res.text();
-        console.log("RAW RESPONSE:", raw);
+        console.log("RAW:", raw);
 
-        let data;
-        try {
-            data = JSON.parse(raw);
-        } catch (e) {
-            msg.textContent = "Server tidak mengirim JSON valid.";
-            msg.style.color = "red";
-            return;
-        }
+        let data = JSON.parse(raw);
 
-        // SESUAI JSON OUTPUT code.gs
         if (data.ok) {
-            msg.textContent = "Curhat berhasil dikirim!";
+            msg.textContent = "Curhat terkirim!";
             msg.style.color = "green";
             document.getElementById("curhat").value = "";
             document.getElementById("foto").value = "";
             preview.style.display = "none";
         } else {
-            msg.textContent = "Gagal: " + (data.error || data.message);
+            msg.textContent = "Gagal: " + (data.error || "Unknown");
             msg.style.color = "red";
         }
-
     } catch (err) {
-        msg.textContent = "ERROR FETCH: " + err;
+        msg.textContent = "Fetch ERROR: " + err;
         msg.style.color = "red";
     }
 });
