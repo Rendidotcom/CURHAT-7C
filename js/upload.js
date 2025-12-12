@@ -1,16 +1,19 @@
-// upload.js — FINAL UPLOAD FOTO TEST (multipart/form-data)
-document.getElementById("uploadForm").addEventListener("submit", async function (e) {
+// upload.js — FOTO ONLY TEST (multipart/form-data)
+document.getElementById("uploadForm").addEventListener("submit", async (e) => {
     e.preventDefault();
 
-    const msg = document.getElementById("msg");
-    msg.textContent = "Mengirim...";
-
-    const text = document.getElementById("curhat").value.trim();
+    const msg  = document.getElementById("msg");
     const file = document.getElementById("foto").files[0];
 
+    if (!file) {
+        msg.textContent = "❌ Pilih foto dulu.";
+        return;
+    }
+
+    msg.textContent = "Mengupload foto...";
+
     const fd = new FormData();
-    fd.append("curhat", text);
-    if (file) fd.append("foto", file); // NAMA WAJIB "foto"
+    fd.append("foto", file);  // NAMA WAJIB "foto"
 
     try {
         const res = await fetch(window.API_URL, {
@@ -22,11 +25,11 @@ document.getElementById("uploadForm").addEventListener("submit", async function 
         console.log(data);
 
         if (data.ok) {
-            msg.textContent = "✔ Berhasil! Foto & curhat terkirim.";
+            msg.textContent = "✔ Foto berhasil diupload!";
         } else {
             msg.textContent = "❌ Error: " + data.error;
         }
     } catch (err) {
-        msg.textContent = "❌ Fetch error: " + err;
+        msg.textContent = "❌ Fetch Error: " + err;
     }
 });

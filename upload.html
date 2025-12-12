@@ -2,35 +2,31 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Upload Foto Test</title>
+<title>Upload Foto Only</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
 <style>
-    body { font-family: Arial, sans-serif; padding: 20px; max-width: 480px; margin: auto; }
-    input, textarea { width: 100%; margin-top: 10px; padding: 10px; border: 1px solid #ccc; border-radius: 6px; }
+    body { font-family: Arial; padding: 20px; max-width: 480px; margin: auto; }
+    input { width: 100%; margin-top: 10px; padding: 10px; border: 1px solid #ccc; border-radius: 6px; }
     button { margin-top: 15px; padding: 12px; width: 100%; background: #007bff; color: white; border: none; border-radius: 6px; }
     button:hover { background: #0056d2; cursor: pointer; }
-    #msg { margin-top: 20px; font-weight: bold; color: green; }
+    #msg { margin-top: 20px; color: green; font-weight: bold; }
 </style>
 </head>
 
 <body>
 
-<h2>TEST UPLOAD FOTO + CURHAT</h2>
+<h2>TEST UPLOAD FOTO ONLY</h2>
 
 <form id="uploadForm">
-    <label>Curhat:</label>
-    <textarea id="curhat" rows="4"></textarea>
-
     <label>Foto:</label>
-    <input type="file" id="foto" accept="image/*">
+    <input type="file" id="foto" accept="image/*" required>
 
-    <button type="submit">Kirim</button>
+    <button type="submit">Kirim Foto</button>
 </form>
 
 <p id="msg"></p>
 
-<!-- PENTING: file harus 1 folder dengan upload.html -->
 <script src="config.js"></script>
 <script src="upload.js"></script>
 
