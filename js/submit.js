@@ -1,44 +1,53 @@
-document.getElementById("curhatForm").addEventListener("submit", async function (e) {
-  e.preventDefault();
+// ========================================================
+//  SUBMIT.JS — FINAL SINKRON DENGAN CURHAT.HTML & GAS
+// ========================================================
 
-  const msg = document.getElementById("msg");
-  msg.textContent = "Mengirim...";
-  msg.style.color = "black";
+document.addEventListener("DOMContentLoaded", () => {
 
-  const text = document.getElementById("curhat").value.trim();
-  const file = document.getElementById("foto").files[0];
+  const form = document.getElementById("formCurhat");
+  const msg  = document.getElementById("msg");
 
-  if (!text) {
-    msg.textContent = "Teks curhat wajib diisi.";
-    msg.style.color = "red";
-    return;
-  }
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
 
-  const fd = new FormData();
-  fd.append("mode", "submitCurhat");   // WAJIB
-  fd.append("text", text);             // WAJIB
-  fd.append("kelas", "7C");            // WAJIB
-  if (file) fd.append("foto", file);   // opsional
+    msg.textContent = "Mengirim...";
+    msg.style.color = "black";
 
-  try {
-    const res = await fetch(API_URL, {
-      method: "POST",
-      body: fd,
-    });
+    const text = document.getElementById("curhat").value.trim();
+    const foto = document.getElementById("foto").files[0];
 
-    const data = await res.json();
-
-    if (data.status === "success") {
-      msg.textContent = "Curhat berhasil dikirim!";
-      msg.style.color = "green";
-      document.getElementById("curhatForm").reset();
-    } else {
-      msg.textContent = "Gagal: " + data.message;
+    if (!text) {
+      msg.textContent = "Curhat wajib diisi.";
       msg.style.color = "red";
+      return;
     }
 
-  } catch (err) {
-    msg.textContent = "ERROR: " + err;
-    msg.style.color = "red";
-  }
+    try {
+      const fd = new FormData();
+      fd.append("curhat", text);
+      if (foto) fd.append("foto", foto);   // multipart, nama HARUS "foto"
+
+      const res = await fetch(window.API_URL, {
+        method: "POST",
+        body: fd
+      });
+
+      const data = await res.json();
+      console.log("Response GAS:", data);
+
+      if (data.ok) {
+        msg.textContent = "Berhasil dikirim!";
+        msg.style.color = "green";
+        form.reset();
+      } else {
+        msg.textContent = "Gagal: " + (data.error || data.message);
+        msg.style.color = "red";
+      }
+
+    } catch (err) {
+      msg.textContent = "Fetch Error: " + err.message;
+      msg.style.color = "red";
+    }
+  });
+
 });

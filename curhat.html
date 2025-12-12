@@ -17,7 +17,7 @@
     background: #fff;
     padding: 20px;
     border-radius: 12px;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   }
   textarea {
     width: 100%;
@@ -26,6 +26,7 @@
     border-radius: 10px;
     border: 1px solid #ccc;
     resize: vertical;
+    font-size: 15px;
   }
   input[type="file"] {
     margin-top: 10px;
@@ -41,21 +42,23 @@
     color: white;
     cursor: pointer;
   }
+  button:active {
+    opacity: 0.85;
+  }
   #msg {
     margin-top: 15px;
     font-weight: bold;
+    text-align: center;
   }
 </style>
 
-<!-- API_URL global -->
-<script src="js/config.js"></script>
+<script src="config.js"></script>
 
 <script>
-// =============================
-//   CURHAT.html — FINAL STABIL
-// =============================
+// ===========================================================
+//  CURHAT.HTML — FINAL SINKRON DENGAN GAS (MULTIPART READY)
+// ===========================================================
 document.addEventListener("DOMContentLoaded", () => {
-
   const form = document.getElementById("formCurhat");
   const msg  = document.getElementById("msg");
 
@@ -75,37 +78,32 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     try {
-      // GAS kamu tidak pakai ?type=curhat-upload → dihapus
+      // GAS memproses multipart AUTOMATIS (uploadCurhatMultipart)
       const url = window.API_URL;
 
       const fd = new FormData();
       fd.append("curhat", text);
       if (foto) fd.append("foto", foto);
 
-      const r = await fetch(url, { method: "POST", body: fd });
+      const r = await fetch(url, {
+        method: "POST",
+        body: fd
+      });
 
-      // jika GAS error, JSON.parse bisa gagal → tambahkan proteksi
-      const txt = await r.text();
-      let json;
+      const json = await r.json();
+      console.log(json);
 
-      try { json = JSON.parse(txt); }
-      catch {
-        msg.textContent = "Server mengirim data tidak valid:\n" + txt;
-        msg.style.color = "red";
-        return;
-      }
-
-      if (json.ok || json.status === "success") {
+      if (json.ok) {
         msg.textContent = "Berhasil dikirim!";
         msg.style.color = "green";
         form.reset();
       } else {
-        msg.textContent = "Gagal: " + (json.error || json.message);
+        msg.textContent = "Gagal: " + (json.error || json.message || "Error tidak diketahui");
         msg.style.color = "red";
       }
 
     } catch (err) {
-      msg.textContent = "Error fetch: " + err.message;
+      msg.textContent = "Fetch Error: " + err.message;
       msg.style.color = "red";
     }
   });
@@ -119,13 +117,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
   <form id="formCurhat">
     <label>Tuliskan Curhat:</label>
-    <textarea id="curhat" placeholder="Tulis sesuatu..." required></textarea>
+    <textarea id="curhat" placeholder="Tulis curhatmu di sini..." required></textarea>
 
     <label>Upload Foto (opsional):</label><br>
     <input type="file" id="foto" accept="image/*" />
 
     <button type="submit">Kirim</button>
-
     <div id="msg"></div>
   </form>
 </div>
