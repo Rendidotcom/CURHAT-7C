@@ -4,6 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Curhat 7C - Kirim Curhat</title>
+
 <style>
   body {
     font-family: system-ui, Arial;
@@ -16,7 +17,7 @@
     background: #fff;
     padding: 20px;
     border-radius: 12px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
   }
   textarea {
     width: 100%;
@@ -45,54 +46,77 @@
     font-weight: bold;
   }
 </style>
-<script src="config.js"></script>
+
+<!-- API_URL global -->
+<script src="js/config.js"></script>
+
 <script>
-// =========================
-//  CURHAT.html FINAL STABIL
-// =========================
+// =============================
+//   CURHAT.html — FINAL STABIL
+// =============================
 document.addEventListener("DOMContentLoaded", () => {
+
   const form = document.getElementById("formCurhat");
-  const msg = document.getElementById("msg");
+  const msg  = document.getElementById("msg");
 
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
 
     msg.textContent = "Mengirim...";
+    msg.style.color = "black";
 
     const text = document.getElementById("curhat").value.trim();
     const foto = document.getElementById("foto").files[0];
 
     if (!text) {
       msg.textContent = "Curhat wajib diisi.";
+      msg.style.color = "red";
       return;
     }
 
     try {
-      const url = window.API_URL + "?type=curhat-upload";
+      // GAS kamu tidak pakai ?type=curhat-upload → dihapus
+      const url = window.API_URL;
 
       const fd = new FormData();
       fd.append("curhat", text);
       if (foto) fd.append("foto", foto);
 
       const r = await fetch(url, { method: "POST", body: fd });
-      const json = await r.json();
 
-      if (json.status === "ok") {
+      // jika GAS error, JSON.parse bisa gagal → tambahkan proteksi
+      const txt = await r.text();
+      let json;
+
+      try { json = JSON.parse(txt); }
+      catch {
+        msg.textContent = "Server mengirim data tidak valid:\n" + txt;
+        msg.style.color = "red";
+        return;
+      }
+
+      if (json.ok || json.status === "success") {
         msg.textContent = "Berhasil dikirim!";
+        msg.style.color = "green";
         form.reset();
       } else {
-        msg.textContent = "Gagal: " + (json.message || "Error tidak diketahui");
+        msg.textContent = "Gagal: " + (json.error || json.message);
+        msg.style.color = "red";
       }
+
     } catch (err) {
       msg.textContent = "Error fetch: " + err.message;
+      msg.style.color = "red";
     }
   });
 });
 </script>
 </head>
+
 <body>
 <div class="wrap">
   <h2>Kirim Curhat</h2>
+
   <form id="formCurhat">
     <label>Tuliskan Curhat:</label>
     <textarea id="curhat" placeholder="Tulis sesuatu..." required></textarea>
@@ -101,6 +125,7 @@ document.addEventListener("DOMContentLoaded", () => {
     <input type="file" id="foto" accept="image/*" />
 
     <button type="submit">Kirim</button>
+
     <div id="msg"></div>
   </form>
 </div>
