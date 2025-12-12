@@ -61,7 +61,6 @@ document.getElementById("btnUpload").addEventListener("click", async () => {
             body: form
         });
 
-        // Coba baca JSON aman
         const text = await res.text();
         console.log("RAW RESPONSE:", text);
 

@@ -20,6 +20,9 @@
             border-radius: 12px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.05);
         }
+        h2 {
+            margin-top: 0;
+        }
         textarea {
             width: 100%;
             resize: vertical;
@@ -49,12 +52,14 @@
             font-size: 16px;
             cursor: pointer;
         }
-        button:hover {
-            background: #1e4fcf;
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
         }
         #msg {
-            margin-top: 10px;
+            margin-top: 12px;
             font-weight: bold;
+            text-align: center;
         }
     </style>
 </head>
@@ -68,21 +73,20 @@
 
     <input type="file" id="foto" accept="image/*">
 
-    <img id="preview">
+    <img id="preview" alt="Preview Foto">
 
     <button id="submitBtn">Kirim Curhat</button>
 
     <div id="msg"></div>
 </div>
 
-
 <!-- CONFIG -->
 <script src="js/config.js"></script>
 
-<!-- UPLOAD (preview foto) -->
+<!-- PREVIEW FOTO -->
 <script src="js/upload.js"></script>
 
-<!-- SUBMIT SCRIPT -->
+<!-- SUBMIT FORM -->
 <script src="js/submit.js"></script>
 
 </body>
