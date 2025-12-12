@@ -1,21 +1,19 @@
-const API_URL = window.API_URL;
+// submit.js — FINAL NO LOGIN, ANONIM, SUPPORT FOTO
 
 document.getElementById("submitBtn").addEventListener("click", async () => {
     const msg = document.getElementById("msg");
     const text = document.getElementById("curhat").value.trim();
     const foto = document.getElementById("foto").files[0];
 
+    msg.textContent = "Mengirim...";
+
     if (!text) {
         msg.textContent = "Curhat tidak boleh kosong.";
-        msg.style.color = "red";
         return;
     }
 
-    msg.textContent = "Mengirim...";
-    msg.style.color = "black";
-
     const fd = new FormData();
-    fd.append("curhat", text);     // ← WAJIB: sama dengan router GAS
+    fd.append("curhat", text);
     if (foto) fd.append("foto", foto);
 
     try {
@@ -24,23 +22,16 @@ document.getElementById("submitBtn").addEventListener("click", async () => {
             body: fd
         });
 
-        const raw = await res.text();
-        console.log("RAW:", raw);
+        const json = await res.json();
 
-        let data = JSON.parse(raw);
-
-        if (data.ok) {
-            msg.textContent = "Curhat terkirim!";
-            msg.style.color = "green";
+        if (json.ok) {
+            msg.textContent = "Curhat terkirim! 🙏";
             document.getElementById("curhat").value = "";
             document.getElementById("foto").value = "";
-            preview.style.display = "none";
         } else {
-            msg.textContent = "Gagal: " + (data.error || "Unknown");
-            msg.style.color = "red";
+            msg.textContent = "Gagal: " + json.error;
         }
     } catch (err) {
-        msg.textContent = "Fetch ERROR: " + err;
-        msg.style.color = "red";
+        msg.textContent = "Error: " + err.message;
     }
 });
