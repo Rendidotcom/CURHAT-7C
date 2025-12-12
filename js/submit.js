@@ -1,58 +1,52 @@
-// submit.js — FINAL SINKRON CURHAT 7C (sesuai code.gs asli)
+// submit.js — FIX SESUAI ROUTER GAS (MULTIPART)
+const API_URL = window.API_URL;
 
 document.getElementById("submitBtn").addEventListener("click", async () => {
     const msg = document.getElementById("msg");
     const text = document.getElementById("curhat").value.trim();
     const foto = document.getElementById("foto").files[0];
 
-    msg.style.color = "#000";
-    msg.textContent = "Mengirim...";
-
     if (!text) {
-        msg.style.color = "red";
         msg.textContent = "Curhat tidak boleh kosong.";
+        msg.style.color = "red";
         return;
     }
 
-    // Wajib: gunakan field "curhat" dan "foto"
-    const fd = new FormData();
-    fd.append("curhat", text);
-    if (foto) fd.append("foto", foto);
+    msg.textContent = "Mengirim...";
+    msg.style.color = "black";
+
+    const form = new FormData();
+    form.append("curhat", text);   // WAJIB: sesuai router GAS
+    if (foto) form.append("foto", foto);
 
     try {
-        const res = await fetch(window.API_URL, {
-            method: "POST",
-            body: fd
-        });
-
+        const res = await fetch(API_URL, { method: "POST", body: form });
         const raw = await res.text();
-        console.log("RAW:", raw);
+        console.log("RAW RESPONSE:", raw);
 
-        let json = {};
+        let data;
         try {
-            json = JSON.parse(raw);
+            data = JSON.parse(raw);
         } catch (e) {
+            msg.textContent = "Server tidak mengirim JSON valid.";
             msg.style.color = "red";
-            msg.textContent = "Response bukan JSON valid";
             return;
         }
 
-        if (json.ok) {
+        // SESUAI JSON OUTPUT code.gs
+        if (data.ok) {
+            msg.textContent = "Curhat berhasil dikirim!";
             msg.style.color = "green";
-            msg.textContent = "Curhat terkirim ✔";
-
-            // Reset
             document.getElementById("curhat").value = "";
             document.getElementById("foto").value = "";
-            document.getElementById("preview").style.display = "none";
-
+            preview.style.display = "none";
         } else {
+            msg.textContent = "Gagal: " + (data.error || data.message);
             msg.style.color = "red";
-            msg.textContent = "Gagal: " + (json.error || json.message || "Error");
         }
 
     } catch (err) {
+        msg.textContent = "ERROR FETCH: " + err;
         msg.style.color = "red";
-        msg.textContent = "Fetch Error: " + err.message;
     }
 });
