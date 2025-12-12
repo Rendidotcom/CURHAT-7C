@@ -1,4 +1,4 @@
-// submit.js — FINAL NO LOGIN, ANONIM, SUPPORT FOTO
+// submit.js — FINAL CURHAT 7C (sinkron GAS)
 
 document.getElementById("submitBtn").addEventListener("click", async () => {
     const msg = document.getElementById("msg");
@@ -13,6 +13,7 @@ document.getElementById("submitBtn").addEventListener("click", async () => {
     }
 
     const fd = new FormData();
+    fd.append("action", "curhat");   // WAJIB → router GAS kenal request
     fd.append("curhat", text);
     if (foto) fd.append("foto", foto);
 
@@ -28,11 +29,10 @@ document.getElementById("submitBtn").addEventListener("click", async () => {
             msg.textContent = "Curhat terkirim! 🙏";
             document.getElementById("curhat").value = "";
             document.getElementById("foto").value = "";
-            document.getElementById("preview").style.display = "none";
         } else {
-            msg.textContent = "Gagal: " + json.error;
+            msg.textContent = "Gagal: " + (json.error || "Unknown error");
         }
     } catch (err) {
-        msg.textContent = "Error: " + err.message;
+        msg.textContent = "Fetch Error: " + err.message;
     }
 });
