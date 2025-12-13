@@ -17,11 +17,12 @@ document.getElementById("submitBtn").onclick = async () => {
   try {
     const res = await fetch(API_URL, {
       method: "POST",
-      body: fd
+      body: fd,
+      mode: "cors",
+      redirect: "follow"
     });
 
-    const text = await res.text();
-    const json = JSON.parse(text);
+    const json = await res.json();
 
     if (json.ok) {
       msg.textContent = "✅ Curhat terkirim";
