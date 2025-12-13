@@ -1,54 +1,37 @@
-// ===========================
-// submit.js — FINAL FIXED
-// ===========================
+document.getElementById("submitBtn").onclick = async () => {
+  const msg = document.getElementById("msg");
+  const curhat = document.getElementById("curhat").value.trim();
+  const foto = document.getElementById("foto").files[0];
 
-document.getElementById("submitBtn").addEventListener("click", async () => {
+  if (!curhat) {
+    msg.textContent = "Curhat tidak boleh kosong";
+    return;
+  }
 
-    const msg = document.getElementById("msg");
-    msg.textContent = "Mengirim...";
+  const fd = new FormData();
+  fd.append("curhat", curhat);
+  if (foto) fd.append("foto", foto);
 
-    const text = document.getElementById("curhat").value.trim();
-    const foto = document.getElementById("foto").files[0];
+  msg.textContent = "Mengirim...";
 
-    if (!text) {
-        msg.textContent = "Isi curhat dulu.";
-        return;
+  try {
+    const res = await fetch(API_URL, {
+      method: "POST",
+      body: fd
+    });
+
+    const text = await res.text();
+    const json = JSON.parse(text);
+
+    if (json.ok) {
+      msg.textContent = "✅ Curhat terkirim";
+      document.getElementById("curhat").value = "";
+      document.getElementById("foto").value = "";
+    } else {
+      msg.textContent = "❌ Gagal: " + json.error;
     }
 
-    try {
-        // ============================================================
-        // 1. KIRIM MODE MULTIPART (FormData) — cocok dengan GAS kamu
-        // ============================================================
-        const fd = new FormData();
-        fd.append("mode", "curhat");
-        fd.append("curhat", text);
-
-        if (foto) {
-            fd.append("foto", foto, foto.name);
-        }
-
-        const res = await fetch(API_URL, {
-            method: "POST",
-            body: fd,
-        });
-
-        const out = await res.json().catch(() => null);
-
-        if (!out || out.ok !== true) {
-            msg.textContent = "Gagal: " + (out?.error || "UNKNOWN_RESPONSE");
-            return;
-        }
-
-        msg.textContent = out.msg || "Terkirim ✔";
-        if (out.fotoURL) {
-            console.log("Foto URL:", out.fotoURL);
-        }
-
-        // Reset form
-        document.getElementById("curhat").value = "";
-        document.getElementById("foto").value = "";
-
-    } catch (err) {
-        msg.textContent = "ERROR: " + err.message;
-    }
-});
+  } catch (err) {
+    msg.textContent = "❌ Error: " + err.message;
+  }
+};
