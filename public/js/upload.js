@@ -1,32 +1,28 @@
-document.getElementById("submitBtn").onclick = async () => {
+document.getElementById("uploadBtn").onclick = async () => {
   const msg = document.getElementById("msg");
-  const curhat = document.getElementById("curhat").value.trim();
   const foto = document.getElementById("foto").files[0];
 
-  if (!curhat) {
-    msg.textContent = "Curhat tidak boleh kosong";
+  if (!foto) {
+    msg.textContent = "❌ Pilih file dulu";
     return;
   }
 
   const fd = new FormData();
-  fd.append("curhat", curhat);
-  if (foto) fd.append("foto", foto);
+  fd.append("curhat", "[UPLOAD_ONLY]");
+  fd.append("foto", foto);
 
-  msg.textContent = "Mengirim...";
+  msg.textContent = "⏳ Uploading...";
 
   try {
     const res = await fetch(API_URL, {
       method: "POST",
-      body: fd,
-      mode: "cors",
-      redirect: "follow"
+      body: fd
     });
 
     const json = await res.json();
 
     if (json.ok) {
-      msg.textContent = "✅ Curhat terkirim";
-      document.getElementById("curhat").value = "";
+      msg.textContent = "✅ Upload berhasil";
       document.getElementById("foto").value = "";
     } else {
       msg.textContent = "❌ Gagal: " + json.error;
