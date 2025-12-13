@@ -4,18 +4,138 @@
 <meta charset="UTF-8">
 <title>Curhat 7C</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
+
+<style>
+    body {
+        margin: 0;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        background: linear-gradient(135deg, #e0f2ff, #fdf2ff);
+        padding: 16px;
+    }
+
+    .card {
+        background: #ffffff;
+        width: 100%;
+        max-width: 480px;
+        padding: 22px;
+        border-radius: 16px;
+        box-shadow: 0 12px 30px rgba(0,0,0,0.08);
+    }
+
+    h2 {
+        text-align: center;
+        margin-top: 0;
+        margin-bottom: 6px;
+        color: #6a1b9a;
+    }
+
+    .subtitle {
+        text-align: center;
+        font-size: 0.95em;
+        color: #555;
+        margin-bottom: 18px;
+        line-height: 1.4;
+    }
+
+    textarea {
+        width: 100%;
+        min-height: 130px;
+        padding: 12px;
+        border-radius: 12px;
+        border: 1px solid #ccc;
+        font-size: 1em;
+        resize: vertical;
+        box-sizing: border-box;
+    }
+
+    textarea:focus {
+        outline: none;
+        border-color: #7b1fa2;
+        box-shadow: 0 0 0 2px rgba(123,31,162,0.12);
+    }
+
+    .file-box {
+        margin-top: 14px;
+        font-size: 0.9em;
+        color: #444;
+    }
+
+    input[type="file"] {
+        margin-top: 6px;
+    }
+
+    button {
+        width: 100%;
+        margin-top: 18px;
+        padding: 13px;
+        font-size: 1em;
+        border: none;
+        border-radius: 12px;
+        background: linear-gradient(135deg, #7b1fa2, #512da8);
+        color: #fff;
+        cursor: pointer;
+        transition: transform 0.1s ease, box-shadow 0.1s ease;
+    }
+
+    button:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+    }
+
+    button:active {
+        transform: translateY(0);
+        box-shadow: 0 3px 10px rgba(0,0,0,0.12);
+    }
+
+    #msg {
+        margin-top: 14px;
+        text-align: center;
+        font-size: 0.95em;
+    }
+
+    .note {
+        margin-top: 14px;
+        text-align: center;
+        font-size: 0.8em;
+        color: #777;
+    }
+</style>
 </head>
 
 <body>
-<h2>Curhat 7C</h2>
 
-<textarea id="curhat" rows="6" style="width:100%" placeholder="Tulis curhat..."></textarea><br><br>
-<input type="file" id="foto" accept="image/*"><br><br>
-<button id="submitBtn">Kirim</button>
+<div class="card">
+    <h2>💬 Curhat 7C</h2>
+    <div class="subtitle">
+        Ruang aman untuk menulis apa pun yang kamu rasakan.<br>
+        Tidak perlu sempurna, cukup jujur dari hati 🤍
+    </div>
 
-<p id="msg"></p>
+    <textarea
+        id="curhat"
+        placeholder="Tulis curhatmu di sini… tentang harimu, perasaanmu, atau hal yang ingin kamu lepaskan 🌱"
+    ></textarea>
+
+    <div class="file-box">
+        📷 Tambahkan foto (opsional)
+        <input type="file" id="foto" accept="image/*">
+    </div>
+
+    <button id="submitBtn">✨ Kirim Curhat</button>
+
+    <p id="msg"></p>
+
+    <div class="note">
+        Terima kasih sudah berani berbagi 🌈
+    </div>
+</div>
 
 <script src="js/config.js"></script>
 <script src="js/submit.js"></script>
+
 </body>
 </html>
