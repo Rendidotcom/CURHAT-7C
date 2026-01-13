@@ -1,0 +1,28 @@
+<style>
+  .nav-display {
+    margin-top: 28px;
+    text-align: center;
+  }
+
+  .btn-display {
+    display: inline-block;
+    padding: 14px 28px;
+    background: linear-gradient(135deg, #7b3fe4, #9f6bff);
+    color: #fff;
+    font-size: 15px;
+    font-weight: 600;
+    text-decoration: none;
+    border-radius: 999px;
+    box-shadow: 0 10px 24px rgba(123, 63, 228, 0.25);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .btn-display:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 14px 30px rgba(123, 63, 228, 0.35);
+  }
+
+  .btn-display:active {
+    transform: scale(0.97);
+  }
+</style>
