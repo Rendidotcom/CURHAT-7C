@@ -1,7 +1,7 @@
 // config.js — FINAL
 (function () {
   const API_URL =
-    "https://script.google.com/macros/s/AKfycbzRiBYuKfPG0igR_vTndmUNqY3td8fH0edsFA7d-V2bDhUAeDqgoicNjgud2sQ4pT-tsA/exec";
+    "https://script.google.com/macros/s/AKfycbwBlUf99LIULk2jHFv0hkyDW_sFGuc4CGoqeilP9Dj__8ukqFRzgNGueEMDo7QKeSWWPA/exec";
 
   window.API_URL = API_URL;
 })();
